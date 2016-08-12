@@ -20,9 +20,19 @@ plugin = Plugin(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft,
-    inputs={'unaligned_sequences': FeatureData[Sequence]},
+    inputs={'sequences': FeatureData[Sequence]},
     parameters={},
-    outputs=[('aligned_sequences', FeatureData[AlignedSequence])],
+    outputs=[('alignment', FeatureData[AlignedSequence])],
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT.")
+)
+
+plugin.methods.register_function(
+    function=q2_alignment.mask,
+    inputs={'alignment': FeatureData[AlignedSequence]},
+    parameters={},
+    outputs=[('masked_alignment', FeatureData[AlignedSequence])],
+    name='Positional conservation and gap filtering.',
+    description=("Remove unconserved and highly gapped positions from an "
+                 "alignment.")
 )

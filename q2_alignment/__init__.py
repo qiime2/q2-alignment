@@ -7,7 +7,8 @@
 # ----------------------------------------------------------------------------
 
 from ._mafft import mafft
+from ._filter import mask
 
 __version__ = '0.0.0-dev'
 
-__all__ = ['mafft']
+__all__ = ['mafft', 'mask']
