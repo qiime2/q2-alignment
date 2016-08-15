@@ -14,14 +14,14 @@ import os.path
 import skbio
 
 
-def mafft(unaligned_sequences: types.GeneratorType) -> skbio.TabularMSA:
+def mafft(sequences: types.GeneratorType) -> skbio.TabularMSA:
     # TODO use qiime.TemporaryDirectory(), pending merge of qiime2/qiime2#108
     with tempfile.TemporaryDirectory() as tmpdirname:
         unaligned_fp = os.path.join(tmpdirname, 'unaligned.fasta')
         aligned_fp = os.path.join(tmpdirname, 'aligned.fasta')
         # write the unaligned sequences to file
         with open(unaligned_fp, 'w') as unaligned_f:
-            for sequence in unaligned_sequences:
+            for sequence in sequences:
                 sequence.write(unaligned_f, format='fasta')
         # build the mafft command
         cmd = ["mafft", "--quiet", unaligned_fp]
