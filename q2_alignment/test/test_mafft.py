@@ -9,20 +9,27 @@
 import skbio
 import unittest
 
+from q2_types.testing import TestPluginBase
+from q2_types.feature_data import DNAFASTAFormat
+
 from q2_alignment import mafft
 
 
-class MafftTests(unittest.TestCase):
+class MafftTests(TestPluginBase):
+
+    package = 'q2_alignment.test'
 
     def test_mafft(self):
-        input_sequences = [skbio.DNA('AGGGGGG', metadata={'id': 'seq1'}),
-                           skbio.DNA('GGGGGG', metadata={'id': 'seq2'})]
-        output_alignment = skbio.TabularMSA(
+        input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+        exp = skbio.TabularMSA(
             [skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
         )
         result = mafft(input_sequences)
-        self.assertEqual(result, output_alignment)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
 
 if __name__ == "__main__":
     unittest.main()

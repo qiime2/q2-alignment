@@ -22,5 +22,6 @@ setup(
     url="http://www.qiime.org",
     entry_points={
         'qiime.plugins': ['q2-alignment=q2_alignment.plugin_setup:plugin']
-    }
+    },
+    package_data={'q2_alignment.test': ['data/*']}
 )
