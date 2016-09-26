@@ -49,12 +49,19 @@ def _apply_mask(alignment, mask):
 
 
 def _compute_frequencies(alignment):
-    return [c.frequencies()
-            for c in alignment.iter_positions(ignore_metadata=True)]
+    # this try/accept allows us to support the ignore_metadata optimization
+    # available in scikit-bio 0.5.0 and later, but be backward compatible
+    # with scikit-bio 0.4.2, which some plugins depend on.
+    try:
+        return [c.frequencies()
+                for c in alignment.iter_positions(ignore_metadata=True)]
+    except TypeError:
+        return [c.frequencies()
+                for c in alignment.iter_positions()]
 
 
-def mask(alignment: skbio.TabularMSA, max_gap_frequency: float =0.05,
-         min_conservation: float =0.40) -> skbio.TabularMSA:
+def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=0.05,
+         min_conservation: float=0.40) -> skbio.TabularMSA:
     # check that parameters are in range
     if max_gap_frequency < 0.0 or max_gap_frequency > 1.0:
         raise ValueError('max_gap_frequency out of range [0.0, 1.0]: %f' %

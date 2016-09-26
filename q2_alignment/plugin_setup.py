@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from qiime.plugin import Plugin
+from qiime.plugin import Plugin, Float
 from q2_types import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
@@ -30,7 +30,8 @@ plugin.methods.register_function(
 plugin.methods.register_function(
     function=q2_alignment.mask,
     inputs={'alignment': FeatureData[AlignedSequence]},
-    parameters={},
+    parameters={'max_gap_frequency': Float,
+                'min_conservation': Float},
     outputs=[('masked_alignment', FeatureData[AlignedSequence])],
     name='Positional conservation and gap filtering.',
     description=("Remove unconserved and highly gapped positions from an "
