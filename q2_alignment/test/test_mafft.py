@@ -9,7 +9,7 @@
 import skbio
 import unittest
 
-from q2_types.testing import TestPluginBase
+from qiime.plugin.testing import TestPluginBase
 from q2_types.feature_data import DNAFASTAFormat
 
 from q2_alignment import mafft
