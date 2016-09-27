@@ -5,14 +5,17 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
+import os
+import unittest
+import subprocess
 
 import skbio
-import unittest
-
 from qiime.plugin.testing import TestPluginBase
-from q2_types.feature_data import DNAFASTAFormat
+from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
+from qiime.util import redirected_stdio
 
 from q2_alignment import mafft
+from q2_alignment._mafft import run_command
 
 
 class MafftTests(TestPluginBase):
@@ -26,10 +29,27 @@ class MafftTests(TestPluginBase):
             [skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
         )
-        result = mafft(input_sequences)
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft(input_sequences)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
+
+
+class RunCommandTests(TestPluginBase):
+
+    package = 'q2_alignment.test'
+
+    def test_failed_run(self):
+        input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+        output_alignment = AlignedDNAFASTAFormat()
+        unaligned_fp = str(input_sequences)
+        aligned_fp = str(output_alignment)
+        cmd = ["mafft", "--not-a-real-parameter", unaligned_fp]
+        with self.assertRaises(subprocess.CalledProcessError):
+            with redirected_stdio(stderr=os.devnull):
+                run_command(cmd, aligned_fp)
 
 if __name__ == "__main__":
     unittest.main()
