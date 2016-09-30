@@ -60,7 +60,7 @@ def _compute_frequencies(alignment):
                 for c in alignment.iter_positions()]
 
 
-def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=0.05,
+def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=1.0,
          min_conservation: float=0.40) -> skbio.TabularMSA:
     # check that parameters are in range
     if max_gap_frequency < 0.0 or max_gap_frequency > 1.0:
@@ -69,6 +69,10 @@ def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=0.05,
     if min_conservation < 0.0 or min_conservation > 1.0:
         raise ValueError('min_conservation out of range [0.0, 1.0]: %f' %
                          min_conservation)
+    # check that input alignment is not empty
+    if alignment.shape.position == 0:
+        raise ValueError('Input alignment is empty (i.e., there are zero '
+                         'sequences or positions in the input alignment).')
     # compute frequencies of all alphabet characters
     frequencies = _compute_frequencies(alignment)
     # compute gap and conservation masks, and then combine them
@@ -79,4 +83,20 @@ def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=0.05,
                                                    min_conservation)
     combined_mask = gap_mask & conservation_mask
     # apply the mask and return the resulting alignment
-    return _apply_mask(alignment, combined_mask)
+    result = _apply_mask(alignment, combined_mask)
+
+    if result.shape.position == 0:
+        num_input_positions = alignment.shape.position
+        frac_passed_gap = (gap_mask.sum() / num_input_positions)
+        str_passed_gap = '{percent:.2%}'.format(percent=frac_passed_gap)
+        frac_passed_conservation = \
+            (conservation_mask.sum() / num_input_positions)
+        str_passed_conservation = \
+            '{percent:.2%}'.format(percent=frac_passed_conservation)
+        raise ValueError("No alignment positions remain after filtering. The "
+                         "filter thresholds will need to be relaxed. %s "
+                         "of positions were retained by the gap filter, and "
+                         "%s of positions were retained by the "
+                         "conservation filter." %
+                         (str_passed_gap, str_passed_conservation))
+    return result
