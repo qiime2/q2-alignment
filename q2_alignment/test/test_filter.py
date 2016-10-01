@@ -82,11 +82,6 @@ class MaskTests(unittest.TestCase):
              skbio.DNA('A', metadata={'id': 'seq2', 'description': ''}),
              skbio.DNA('A', metadata={'id': 'seq3', 'description': ''})]
         )
-        empty_alignment = skbio.TabularMSA(
-            [skbio.DNA('', metadata={'id': 'seq1', 'description': ''}),
-             skbio.DNA('', metadata={'id': 'seq2', 'description': ''}),
-             skbio.DNA('', metadata={'id': 'seq3', 'description': ''})]
-        )
 
         actual = mask(alignment1, max_gap_frequency=1.0, min_conservation=0.0)
         self.assertEqual(actual, alignment1)
@@ -94,10 +89,17 @@ class MaskTests(unittest.TestCase):
         actual = mask(alignment2, max_gap_frequency=0.0, min_conservation=0.0)
         self.assertEqual(actual, alignment2)
 
-        eps = np.finfo(float).eps
-        actual = mask(alignment1, max_gap_frequency=1.0-eps,
-                      min_conservation=0.0)
-        self.assertEqual(actual, empty_alignment)
+    def test_error_on_empty_alignment_gap_boundary(self):
+        alignment1 = skbio.TabularMSA(
+            [skbio.DNA('A', metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('-', metadata={'id': 'seq2', 'description': ''}),
+             skbio.DNA('-', metadata={'id': 'seq3', 'description': ''})]
+        )
+
+        self.assertRaisesRegex(ValueError,
+                               " 0.00% of positions were retained by the gap",
+                               mask, alignment1, max_gap_frequency=0.1,
+                               min_conservation=0.0)
 
     def test_conservation_boundaries(self):
         alignment1 = skbio.TabularMSA(
@@ -108,20 +110,23 @@ class MaskTests(unittest.TestCase):
             [skbio.DNA('-', metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('-', metadata={'id': 'seq2', 'description': ''}),
              skbio.DNA('-', metadata={'id': 'seq3', 'description': ''})])
-        empty_alignment = skbio.TabularMSA(
-            [skbio.DNA('', metadata={'id': 'seq1', 'description': ''}),
-             skbio.DNA('', metadata={'id': 'seq2', 'description': ''}),
-             skbio.DNA('', metadata={'id': 'seq3', 'description': ''})])
-        eps = np.finfo(float).eps
+
         actual = mask(alignment1, max_gap_frequency=1.0, min_conservation=1.0)
         self.assertEqual(actual, alignment1)
 
         actual = mask(alignment2, max_gap_frequency=1.0, min_conservation=0.0)
         self.assertEqual(actual, alignment2)
 
-        actual = mask(alignment2, max_gap_frequency=1.0,
-                      min_conservation=0.0+eps)
-        self.assertEqual(actual, empty_alignment)
+    def test_error_on_empty_alignment_conservation_boundary(self):
+        alignment1 = skbio.TabularMSA(
+            [skbio.DNA('A', metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('C', metadata={'id': 'seq2', 'description': ''}),
+             skbio.DNA('G', metadata={'id': 'seq3', 'description': ''})])
+
+        self.assertRaisesRegex(ValueError,
+                               " 0.00% of positions were retained by the con",
+                               mask, alignment1, max_gap_frequency=1.0,
+                               min_conservation=0.5)
 
     def test_invalid_gap_threshold(self):
         alignment = skbio.TabularMSA(
@@ -146,3 +151,16 @@ class MaskTests(unittest.TestCase):
             mask(alignment, min_conservation=0.0 - eps)
         with self.assertRaises(ValueError):
             mask(alignment, min_conservation=1.0 + eps)
+
+    def test_empty_input(self):
+        alignment = skbio.TabularMSA(
+            [skbio.DNA('', metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('', metadata={'id': 'seq2', 'description': ''}),
+             skbio.DNA('', metadata={'id': 'seq3', 'description': ''})]
+            )
+        with self.assertRaises(ValueError):
+            mask(alignment)
+
+        alignment = skbio.TabularMSA([])
+        with self.assertRaises(ValueError):
+            mask(alignment)
