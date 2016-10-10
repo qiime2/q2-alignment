@@ -1,2 +1,3 @@
 # q2-alignment
-Support for multiple sequence alignment in QIIME 2. 
+
+This is a QIIME 2 plugin. For details on QIIME 2, see [2.qiime.org](http://2.qiime.org).
