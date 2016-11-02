@@ -9,6 +9,6 @@
 from ._mafft import mafft
 from ._filter import mask
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 __all__ = ['mafft', 'mask']
