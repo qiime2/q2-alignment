@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2016--, QIIME development team.
+# Copyright (c) 2016-2017, QIIME 2 development team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -10,9 +10,9 @@ import unittest
 import subprocess
 
 import skbio
-from qiime.plugin.testing import TestPluginBase
+from qiime2.plugin.testing import TestPluginBase
 from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
-from qiime.util import redirected_stdio
+from qiime2.util import redirected_stdio
 
 from q2_alignment import mafft
 from q2_alignment._mafft import run_command
@@ -50,6 +50,7 @@ class RunCommandTests(TestPluginBase):
         with self.assertRaises(subprocess.CalledProcessError):
             with redirected_stdio(stderr=os.devnull):
                 run_command(cmd, aligned_fp)
+
 
 if __name__ == "__main__":
     unittest.main()
