@@ -23,6 +23,9 @@ plugin.methods.register_function(
     inputs={'sequences': FeatureData[Sequence]},
     parameters={},
     outputs=[('alignment', FeatureData[AlignedSequence])],
+    input_descriptions={'sequences': 'The sequences to be aligned.'},
+    parameter_descriptions={},
+    output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT.")
 )
@@ -33,7 +36,26 @@ plugin.methods.register_function(
     parameters={'max_gap_frequency': Float,
                 'min_conservation': Float},
     outputs=[('masked_alignment', FeatureData[AlignedSequence])],
+    input_descriptions={'alignment': 'The alignment to be masked.'},
+    parameter_descriptions={
+        'max_gap_frequency': ('The maximum relative frequency of gap '
+                              'characters in a column for the column to be '
+                              'retained. This relative frequency must be a '
+                              'number between 0.0 and 1.0 (inclusive), where '
+                              '0.0 retains only those columns without gap '
+                              'characters, and 1.0 retains all columns '
+                              'regardless of gap character frequency.'),
+        'min_conservation': ('The minimum relative frequency '
+                             'of at least one non-gap character in a '
+                             'column for that column to be retained. This '
+                             'relative frequency must be a number between 0.0 '
+                             'and 1.0 (inclusive). For example, if a value of '
+                             '0.4 is provided, a column will only be retained '
+                             'if it contains at least one character that is '
+                             'present in at least 40% of the sequences.')
+    },
+    output_descriptions={'masked_alignment': 'The masked alignment.'},
     name='Positional conservation and gap filtering.',
-    description=("Remove unconserved and highly gapped positions from an "
-                 "alignment.")
+    description=("Mask (i.e., filter) unconserved and highly gapped "
+                 "columns from an alignment. ")
 )
