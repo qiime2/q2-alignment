@@ -23,6 +23,9 @@ plugin.methods.register_function(
     inputs={'sequences': FeatureData[Sequence]},
     parameters={},
     outputs=[('alignment', FeatureData[AlignedSequence])],
+    input_descriptions={'sequences': 'The sequences to be aligned.'},
+    parameter_descriptions={},
+    output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT.")
 )
@@ -33,7 +36,17 @@ plugin.methods.register_function(
     parameters={'max_gap_frequency': Float,
                 'min_conservation': Float},
     outputs=[('masked_alignment', FeatureData[AlignedSequence])],
+    input_descriptions={'alignment': 'The alignment to be masked.'},
+    parameter_descriptions={
+        'max_gap_frequency': ('The maximum fraction of sequences that can '
+                              'contain a gap character in a specific column '
+                              'for that column to be retained.'),
+        'min_conservation': ('The minimum fraction of sequences that must '
+                             'contain a single non-gap character in a '
+                             'specific column for that column to be retained.')
+    },
+    output_descriptions={'masked_alignment': 'The filtered alignment.'},
     name='Positional conservation and gap filtering.',
-    description=("Remove unconserved and highly gapped positions from an "
-                 "alignment.")
+    description=("Filter (i.e., mask) unconserved and highly gapped "
+                 "positions from an alignment. ")
 )
