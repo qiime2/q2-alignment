@@ -20,7 +20,7 @@ from q2_alignment._mafft import run_command
 
 class MafftTests(TestPluginBase):
 
-    package = 'q2_alignment.test'
+    package = 'q2_alignment.tests'
 
     def test_mafft(self):
         input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
@@ -38,7 +38,7 @@ class MafftTests(TestPluginBase):
 
 class RunCommandTests(TestPluginBase):
 
-    package = 'q2_alignment.test'
+    package = 'q2_alignment.tests'
 
     def test_failed_run(self):
         input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
