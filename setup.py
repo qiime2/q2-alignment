@@ -22,5 +22,5 @@ setup(
     entry_points={
         'qiime2.plugins': ['q2-alignment=q2_alignment.plugin_setup:plugin']
     },
-    package_data={'q2_alignment.test': ['data/*']}
+    package_data={'q2_alignment.tests': ['data/*']}
 )
