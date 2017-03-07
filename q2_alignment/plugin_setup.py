@@ -15,7 +15,11 @@ plugin = Plugin(
     name='alignment',
     version=q2_alignment.__version__,
     website='https://github.com/qiime2/q2-alignment',
-    package='q2_alignment'
+    package='q2_alignment',
+    citation_text=("MAFFT multiple sequence alignment software version 7: "
+                   "improvements in performance and usability. Katoh K, "
+                   "Standley DM. Mol Biol Evol. 2013 Apr;30(4):772-80. "
+                   "doi: 10.1093/molbev/mst010.")
 )
 
 plugin.methods.register_function(
