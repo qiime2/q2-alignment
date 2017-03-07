@@ -51,6 +51,17 @@ class RunCommandTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 run_command(cmd, aligned_fp)
 
+    def test_failed_run_not_verbose(self):
+        input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+        output_alignment = AlignedDNAFASTAFormat()
+        unaligned_fp = str(input_sequences)
+        aligned_fp = str(output_alignment)
+        cmd = ["mafft", "--not-a-real-parameter", unaligned_fp]
+        with self.assertRaises(subprocess.CalledProcessError):
+            with redirected_stdio(stderr=os.devnull):
+                run_command(cmd, aligned_fp, verbose=False)
+
 
 if __name__ == "__main__":
     unittest.main()
