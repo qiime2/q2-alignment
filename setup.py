@@ -8,9 +8,13 @@
 
 from setuptools import setup, find_packages
 
+import versioneer
+
+
 setup(
     name="q2-alignment",
-    version="2017.3.0.dev",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
     install_requires=['qiime2 == 2017.3.*', 'q2-types == 2017.3.*',
                       'scikit-bio'],
@@ -22,5 +26,6 @@ setup(
     entry_points={
         'qiime2.plugins': ['q2-alignment=q2_alignment.plugin_setup:plugin']
     },
-    package_data={'q2_alignment.tests': ['data/*']}
+    package_data={'q2_alignment.tests': ['data/*']},
+    zip_safe=False,
 )

@@ -6,11 +6,12 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import pkg_resources
-
 from ._mafft import mafft
 from ._filter import mask
+from ._version import get_versions
 
-__version__ = pkg_resources.get_distribution('q2-alignment').version
+
+__version__ = get_versions()['version']
+del get_versions
 
 __all__ = ['mafft', 'mask']
