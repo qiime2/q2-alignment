@@ -16,8 +16,6 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
-    install_requires=['qiime2 == 2017.3.*', 'q2-types == 2017.3.*',
-                      'scikit-bio'],
     author="Greg Caporaso",
     author_email="gregcaporaso@gmail.com",
     description="Create and work with alignments in QIIME 2.",
