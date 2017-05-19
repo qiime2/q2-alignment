@@ -19,7 +19,10 @@ plugin = Plugin(
     citation_text=("MAFFT multiple sequence alignment software version 7: "
                    "improvements in performance and usability. Katoh K, "
                    "Standley DM. Mol Biol Evol. 2013 Apr;30(4):772-80. "
-                   "doi: 10.1093/molbev/mst010.")
+                   "doi: 10.1093/molbev/mst010."),
+    description=('This QIIME 2 plugin provides support for generating '
+                 'and manipulating sequence alignments.'),
+    short_description='Plugin for generating and manipulating alignments.'
 )
 
 plugin.methods.register_function(
