@@ -22,7 +22,7 @@ plugin = Plugin(
                    "doi: 10.1093/molbev/mst010."),
     description=('This QIIME 2 plugin provides support for generating '
                  'and working with sequence alignments.'),
-    short_description='Plugin for generating and working with alignments.'
+    short_description='Plugin for generating and manipulating alignments.'
 )
 
 plugin.methods.register_function(
