@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from qiime2.plugin import Plugin, Float
+from qiime2.plugin import Plugin, Float, Int
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
@@ -28,10 +28,12 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
-    parameters={},
+    parameters={'threads': Int},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
-    parameter_descriptions={},
+    parameter_descriptions={
+        'threads': 'The number of threads. (Use -1 to automatically use all '
+                   'available cores)'},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT.")
