@@ -22,15 +22,30 @@ class MafftTests(TestPluginBase):
 
     package = 'q2_alignment.tests'
 
-    def test_mafft(self):
+    def _prepare_sequence_data(self):
         input_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
         input_sequences = DNAFASTAFormat(input_fp, mode='r')
         exp = skbio.TabularMSA(
             [skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
         )
+
+        return input_sequences, exp
+
+    def test_mafft(self):
+        input_sequences, exp = self._prepare_sequence_data()
+
         with redirected_stdio(stderr=os.devnull):
             result = mafft(input_sequences)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_multithreaded_maft(self):
+        input_sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft(input_sequences, n_threads=-1)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)

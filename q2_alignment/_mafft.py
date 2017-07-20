@@ -24,10 +24,11 @@ def run_command(cmd, output_fp, verbose=True):
         subprocess.run(cmd, stdout=output_f, check=True)
 
 
-def mafft(sequences: DNAFASTAFormat, threads: int=1) -> AlignedDNAFASTAFormat:
+def mafft(sequences: DNAFASTAFormat,
+          n_threads: int=1) -> AlignedDNAFASTAFormat:
     result = AlignedDNAFASTAFormat()
     unaligned_fp = str(sequences)
     aligned_fp = str(result)
-    cmd = ["mafft", "--preservecase", "--thread", str(threads), unaligned_fp]
+    cmd = ["mafft", "--preservecase", "--thread", str(n_threads), unaligned_fp]
     run_command(cmd, aligned_fp)
     return result
