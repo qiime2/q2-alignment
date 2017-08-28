@@ -6,6 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import collections
 import subprocess
 
 import skbio
@@ -35,7 +36,10 @@ def mafft(sequences: DNAFASTAFormat,
     # mafft with the originals.
     #
     # https://github.com/qiime2/q2-alignment/issues/37
-    ids = []
+    #
+    # Note: using OrderedDict to maintain order of IDs and have quick lookup
+    # for duplicates.
+    ids = collections.OrderedDict()
     for seq in skbio.io.read(unaligned_fp, format='fasta',
                              constructor=skbio.DNA):
         id = seq.metadata['id']
@@ -44,7 +48,7 @@ def mafft(sequences: DNAFASTAFormat,
                 "Encountered duplicate sequence ID in unaligned sequences: %r"
                 % id)
         else:
-            ids.append(id)
+            ids[id] = True
 
     result = AlignedDNAFASTAFormat()
     aligned_fp = str(result)
