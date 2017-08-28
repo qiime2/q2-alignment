@@ -41,7 +41,7 @@ class MafftTests(TestPluginBase):
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
 
-    def test_multithreaded_maft(self):
+    def test_multithreaded_mafft(self):
         input_sequences, exp = self._prepare_sequence_data()
 
         with redirected_stdio(stderr=os.devnull):
@@ -49,6 +49,30 @@ class MafftTests(TestPluginBase):
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
+
+    def test_long_ids_are_not_truncated(self):
+        input_fp = self.get_data_path('unaligned-long-ids.fasta')
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft(input_sequences)
+
+        with open(str(result), 'r') as fh:
+            obs = fh.read()
+
+        exp_fp = self.get_data_path('aligned-long-ids.fasta')
+        with open(exp_fp, 'r') as fh:
+            exp = fh.read()
+
+        self.assertEqual(obs, exp)
+
+    def test_duplicate_input_ids(self):
+        input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+
+        with self.assertRaisesRegex(ValueError, 'duplicate.*id1'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft(input_sequences)
 
 
 class RunCommandTests(TestPluginBase):
