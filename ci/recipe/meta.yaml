@@ -23,7 +23,7 @@ requirements:
     - scikit-bio
     - qiime2 {{ release }}.*
     - q2-types {{ release }}.*
-    - mafft
+    - mafft >=7.310
 
 test:
   imports:
