@@ -24,7 +24,9 @@ def run_command(cmd, output_fp, verbose=True):
         print("\nCommand:", end=' ')
         print(" ".join(cmd), end='\n\n')
     with open(output_fp, 'w') as output_f:
-        subprocess.run(cmd, stdout=output_f, check=True)
+        r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                           check=True)
+        output_f.write(r.stdout.decode('ascii'))
 
 
 def mafft(sequences: DNAFASTAFormat,
