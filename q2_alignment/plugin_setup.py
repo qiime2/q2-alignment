@@ -64,5 +64,7 @@ plugin.methods.register_function(
     output_descriptions={'masked_alignment': 'The masked alignment.'},
     name='Positional conservation and gap filtering.',
     description=("Mask (i.e., filter) unconserved and highly gapped "
-                 "columns from an alignment. ")
+                 "columns from an alignment. Default min_conservation was "
+                 "chosen to reproduce the mask presented in Lane (1991)."),
+    citations=[citations['lane1991']]
 )
