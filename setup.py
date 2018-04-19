@@ -24,6 +24,9 @@ setup(
     entry_points={
         'qiime2.plugins': ['q2-alignment=q2_alignment.plugin_setup:plugin']
     },
-    package_data={'q2_alignment.tests': ['data/*']},
+    package_data={
+        'q2_alignment': ['citations.bib'],
+        'q2_alignment.tests': ['data/*']
+    },
     zip_safe=False,
 )
