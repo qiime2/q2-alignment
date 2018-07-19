@@ -53,6 +53,12 @@ def mafft(sequences: DNAFASTAFormat,
     result = AlignedDNAFASTAFormat()
     aligned_fp = str(result)
 
+    # mafft's signal for utilizing all cores is -1. We want to our users
+    # to enter 0 for using all cores. This is to prevent any confusion and
+    # to keep the UX consisent.
+    if n_threads == 0:
+        n_threads = -1
+
     # `--inputorder` must be turned on because we need the input and output in
     # the same sequence order to replace the IDs below. This is mafft's default
     # behavior but we pass the flag in case that changes in the future.

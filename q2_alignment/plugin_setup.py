@@ -25,11 +25,11 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Int % Range(1, None)},
+    parameters={'n_threads': Int % Range(0, None)},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
-        'n_threads': 'The number of threads. (Use -1 to automatically use all '
+        'n_threads': 'The number of threads. (Use 0 to automatically use all '
                      'available cores)'},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
