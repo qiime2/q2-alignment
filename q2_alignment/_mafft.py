@@ -53,9 +53,9 @@ def mafft(sequences: DNAFASTAFormat,
     result = AlignedDNAFASTAFormat()
     aligned_fp = str(result)
 
-    # mafft's default value for utilizing all cores is -1. We want to our users
+    # mafft's signal for utilizing all cores is -1. We want to our users
     # to enter 0 for using all cores. This is to prevent any confusion and
-    # to keep the UX consisentself.
+    # to keep the UX consisent.
     if n_threads == 0:
         n_threads = -1
 
