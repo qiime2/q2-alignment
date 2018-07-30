@@ -60,11 +60,9 @@ class MafftTests(TestPluginBase):
         with open(str(result), 'r') as fh:
             obs = fh.read()
 
-        exp_fp = self.get_data_path('aligned-long-ids.fasta')
-        with open(exp_fp, 'r') as fh:
-            exp = fh.read()
-
-        self.assertEqual(obs, exp)
+        self.assertIn('a'*250, obs)
+        self.assertIn('b'*250, obs)
+        self.assertIn('c'*250, obs)
 
     def test_duplicate_input_ids(self):
         input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
