@@ -53,6 +53,16 @@ def mafft(sequences: DNAFASTAFormat,
     result = AlignedDNAFASTAFormat()
     aligned_fp = str(result)
 
+    # TODO - Use parttree=true in function parameters
+
+    if len(ids) > 1000000 and not parttree:
+        # swtich order
+        raise ValueError(
+            "The number of sequences in your feature table is larger than "
+            "1 million, please use the parttree parameter")
+
+
+
     # mafft's signal for utilizing all cores is -1. We want to our users
     # to enter 0 for using all cores. This is to prevent any confusion and
     # to keep the UX consisent.
@@ -64,6 +74,10 @@ def mafft(sequences: DNAFASTAFormat,
     # behavior but we pass the flag in case that changes in the future.
     cmd = ["mafft", "--preservecase", "--inputorder",
            "--thread", str(n_threads), unaligned_fp]
+
+    if parttree:
+        cmd.append('--parttree')
+
     run_command(cmd, aligned_fp)
 
     # Read output alignment into memory, reassign original sequence IDs, and

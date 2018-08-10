@@ -72,6 +72,16 @@ class MafftTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
+    def test_mafft_parttree(self):
+        input_fp = os.path.join(self.temp_dir.name, 'million.fasta')
+        with open(input_fp, "w") as f:
+            for i in range(0, 1000004):
+                f.write('>%d\nAA\n' %i )
+        self.assertTrue(False)
+
+
+
+
 
 class RunCommandTests(TestPluginBase):
 
