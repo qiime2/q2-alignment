@@ -76,11 +76,7 @@ class MafftTests(TestPluginBase):
         input_fp = os.path.join(self.temp_dir.name, 'million.fasta')
         with open(input_fp, "w") as f:
             for i in range(0, 1000004):
-                f.write('>%d\nAA\n' %i )
-        self.assertTrue(False)
-
-
-
+                f.write('>%d\nAA\n' % i)
 
 
 class RunCommandTests(TestPluginBase):
