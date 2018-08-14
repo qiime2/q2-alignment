@@ -73,8 +73,8 @@ def mafft(sequences: DNAFASTAFormat,
 
     if parttree:
         cmd += ['--parttree']
-    
-    cmd += ['unaligned_fp']
+
+    cmd += [unaligned_fp]
     run_command(cmd, aligned_fp)
 
     # Read output alignment into memory, reassign original sequence IDs, and
