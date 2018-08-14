@@ -83,7 +83,15 @@ class MafftTests(TestPluginBase):
                 mafft(input_sequences)
 
     def test_mafft_parttree_successful_execution(self):
-        self.assertTrue(False)
+        input_fp = os.path.join(self.temp_dir.name, 'million.fasta')
+        with open(input_fp, "w") as f:
+            for i in range(0, 1000004):
+                f.write('>%d\nAA\n' % i)
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+        with self.assertEqual(exit_code, 0):
+            with redirected_stdio(stderr=os.devnull):
+                mafft(input_sequences, parttree=True)
+
 
 
 class RunCommandTests(TestPluginBase):
