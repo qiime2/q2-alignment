@@ -32,7 +32,8 @@ plugin.methods.register_function(
     parameter_descriptions={
         'n_threads': 'The number of threads. (Use 0 to automatically use all '
                      'available cores)',
-        'parttree': '#TODO'},
+        'parttree': 'This flag is required if the number of sequences being '
+                    'aligned are larger than 1000000. Disabled by default'},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT."),
