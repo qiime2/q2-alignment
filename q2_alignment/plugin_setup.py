@@ -38,6 +38,23 @@ plugin.methods.register_function(
 )
 
 plugin.methods.register_function(
+    function=q2_alignment.sina,
+    inputs={'sequences': FeatureData[Sequence],
+            'reference': FeatureData[Sequence]},
+    parameters={},
+    outputs=[('alignment', FeatureData[AlignedSequence])],
+    input_descriptions={
+        'sequences': 'The sequences to be aligned.',
+        'reference': 'The reference alignment.',
+    },
+    output_descriptions={'alignment': 'The aligned sequences.'},
+    name='Reference based multiple sequence alignment with SINA',
+    description=("Perform reference based multiple sequence alignment using"
+                 "SINA."),
+    citations=[citations['pruesse2012sina']]
+)
+
+plugin.methods.register_function(
     function=q2_alignment.mask,
     inputs={'alignment': FeatureData[AlignedSequence]},
     parameters={'max_gap_frequency': Float % Range(0, 1, inclusive_end=True),
