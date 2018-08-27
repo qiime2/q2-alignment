@@ -54,6 +54,13 @@ def mafft(sequences: DNAFASTAFormat,
     result = AlignedDNAFASTAFormat()
     aligned_fp = str(result)
 
+    # mafft will fail if the number of sequences is larger than 1 million.
+    # mafft requires using parttree which is an algorithm to build an approximate
+    # tree from a large number of unaligned sequences.
+    # By catching the error below if a user has not used parttree flag, we are
+    # eliminating the need for the mafft error to be shown to the user which
+    # can be confusing and intimidating.
+
     if not parttree and len(ids) > 1000000:
         raise ValueError(
             "The number of sequences in your feature table is larger than "
