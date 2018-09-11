@@ -8,9 +8,8 @@
 
 from textwrap import dedent
 
-from qiime2.plugin import Plugin, Float, Int, Str, Range, Citations
+from qiime2.plugin import Plugin, Float, Int, Bool, Str, Range, Citations
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
-
 
 import q2_alignment
 
@@ -28,12 +27,15 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Int % Range(0, None)},
+    parameters={'n_threads': Int % Range(0, None),
+                'parttree': Bool},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
         'n_threads': 'The number of threads. (Use 0 to automatically use all '
-                     'available cores)'},
+                     'available cores)',
+        'parttree': 'This flag is required if the number of sequences being '
+                    'aligned are larger than 1000000. Disabled by default'},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT."),

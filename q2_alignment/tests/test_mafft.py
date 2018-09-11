@@ -72,6 +72,16 @@ class MafftTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
+    def test_mafft_parttree_exception(self):
+        input_fp = os.path.join(self.temp_dir.name, 'million.fasta')
+        with open(input_fp, "w") as f:
+            for i in range(0, 1000002):
+                f.write('>%d\nAAGCAAGC\n' % i)
+        input_sequences = DNAFASTAFormat(input_fp, mode='r')
+        with self.assertRaisesRegex(ValueError, '1 million'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft(input_sequences)
+
 
 class RunCommandTests(TestPluginBase):
 
