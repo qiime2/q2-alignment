@@ -46,23 +46,27 @@ plugin.methods.register_function(
     function=q2_alignment.sina,
     inputs={'sequences': FeatureData[Sequence],
             'reference': FeatureData[AlignedSequence]},
-    parameters={'arb_reference': Str},
+    parameters={'arb_reference': Str,
+                'kmer_len': Int % Range(5, 25)},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={
         'sequences': 'The sequences to be aligned.',
         'reference': 'The reference alignment (QZA format).',
     },
     parameter_descriptions={
-        'arb_reference': 'The reference alignment (ARB format).'},
+        'arb_reference': 'The reference alignment (ARB format).',
+        'kmer_len': 'The size of K used in reference search. '
+                    'Use 6-8 for sequences <150bp. '
+                    'Use 10 for full length 16S. '},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='Reference based multiple sequence alignment with SINA',
-    description=(dedent("""
+    description=dedent("""
     Perform reference based multiple sequence alignment using SINA.
 
     Note:
     To use a reference database in ARB format without QZA conversion,
     use the --p-arb-reference parameter instead of --i-reference.
-    """)),
+    """),
     citations=[citations['pruesse2012sina']]
 )
 

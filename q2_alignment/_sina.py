@@ -13,17 +13,20 @@ from tempfile import TemporaryDirectory
 import click
 
 from q2_types.feature_data import AlignedDNAFASTAFormat, DNAFASTAFormat
-from qiime2.plugin import Str
+from qiime2.plugin import Int, Str
 
 import skbio
 import skbio.io
 
+
 def _run_command(cmd):
     sp.run(cmd, check=True)
 
+
 def sina(sequences: DNAFASTAFormat,
          reference: AlignedDNAFASTAFormat=None,
-         arb_reference: Str=None) -> AlignedDNAFASTAFormat:
+         arb_reference: Str=None,
+         kmer_len: Int=10) -> AlignedDNAFASTAFormat:
     if not reference and not arb_reference:
         raise ValueError(
             "SINA needs a reference alignment.\n\n"
@@ -70,7 +73,10 @@ def sina(sequences: DNAFASTAFormat,
             "--outtype", "FASTA",
             "--out", str(aligned),
             "--fasta-write-dna",
-            "--ptdb", arb_reference,
+            "--db", arb_reference,
+            "--fs-req-gaps", "1",  # q2 checks ref is aligned
+            "--fs-min-len", "10",  # allow short references
+            "--fs-kmer-len", str(kmer_len),  # set k
         ])
 
     return aligned
