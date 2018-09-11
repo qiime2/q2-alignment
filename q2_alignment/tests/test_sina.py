@@ -22,6 +22,13 @@ class SINATests(TestPluginBase):
     package = 'q2_alignment.tests'
 
     def _prepare_sequence_data(self):
+        """Prepares test data tuples: reference, query and expected
+
+        This function generates 1) reference alignments as subsets of length
+        n-1 from the reference alignment found in "aligned_fna.fasta", a
+        query (the removed sequence w/o gaps) and an expected alignment
+        (the removed sequence w gaps).
+        """
         input_fp = self.get_data_path('aligned_dna.fasta')
         input_sequences = AlignedDNAFASTAFormat(input_fp, mode='r')
         msa = TabularMSA.read(str(input_sequences), constructor=DNA)
@@ -36,12 +43,25 @@ class SINATests(TestPluginBase):
             yield ref, query, exp
 
     def test_sina(self):
+        """Tests generally correct function of sina() method
+
+        We expect that when re-aligning each individual sequence in our test
+        data set of 18 short 16S fragments (using the remaining 17 sequences as
+        a reference), the original alignment is reproduced with at most two
+        errors, which amounts to >99.5% identity with the original alignment.
+        (It's actually 100% right now, but this test should not be fragile
+        w.r.t SINA versions).
+        """
+        count = 0
+        sum_match_f = 0
         for ref, query, exp in self._prepare_sequence_data():
             with redirected_stdio(stderr=os.devnull):
                 result = sina(query, ref, kmer_len=6)
             aligned = TabularMSA.read(str(result), constructor=DNA)
-            self.assertEqual(aligned[0], exp)
-
+            sum_match_f += aligned[0].match_frequency(exp, relative=True)
+            count += 1
+        avg_match_frequency = sum_match_f / count
+        self.assertTrue(avg_match_frequency > 0.995)
 
 if __name__ == "__main__":
     unittest.main()
