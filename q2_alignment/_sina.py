@@ -20,7 +20,9 @@ import skbio.io
 
 
 def _run_command(cmd):
+    print("# Running command: " + " ".join(cmd))
     sp.run(cmd, check=True)
+    print("# Command "+cmd[0]+" finished")
 
 
 def sina(sequences: DNAFASTAFormat,
