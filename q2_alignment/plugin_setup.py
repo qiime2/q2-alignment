@@ -47,6 +47,7 @@ plugin.methods.register_function(
     inputs={'sequences': FeatureData[Sequence],
             'reference': FeatureData[AlignedSequence]},
     parameters={'arb_reference': Str,
+                'num_references': Int % Range(0, None),
                 'kmer_len': Int % Range(5, 25)},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={
@@ -55,6 +56,8 @@ plugin.methods.register_function(
     },
     parameter_descriptions={
         'arb_reference': 'The reference alignment (ARB format).',
+        'num_references': 'The number of reference sequences used to '
+                          'align each sequence.'
         'kmer_len': 'The size of K used in reference search. '
                     'Use 6-8 for sequences <150bp. '
                     'Use 10 for full length 16S. '},

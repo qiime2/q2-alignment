@@ -40,6 +40,7 @@ def check_no_duplicate_fasta_id(fasta_fp):
 def sina(sequences: DNAFASTAFormat,
          reference: AlignedDNAFASTAFormat=None,
          arb_reference: Str=None,
+         num_references: Int=40,
          kmer_len: Int=10) -> AlignedDNAFASTAFormat:
     if not reference and not arb_reference:
         raise ValueError(
@@ -81,6 +82,7 @@ def sina(sequences: DNAFASTAFormat,
             "--fs-req-gaps", "1",  # q2 checks ref is aligned
             "--fs-min-len", "10",  # allow short references
             "--fs-kmer-len", str(kmer_len),  # set k
+            "--fs-max", str(num_references),
         ])
 
     return aligned

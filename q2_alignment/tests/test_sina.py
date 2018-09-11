@@ -56,7 +56,7 @@ class SINATests(TestPluginBase):
         sum_match_f = 0
         for ref, query, exp in self._prepare_sequence_data():
             with redirected_stdio(stderr=os.devnull):
-                result = sina(query, ref, kmer_len=6)
+                result = sina(query, ref, kmer_len=6, num_references=5)
             aligned = TabularMSA.read(str(result), constructor=DNA)
             sum_match_f += aligned[0].match_frequency(exp, relative=True)
             count += 1
