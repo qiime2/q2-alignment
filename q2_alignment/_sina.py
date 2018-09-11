@@ -25,6 +25,18 @@ def _run_command(cmd):
     print("# Command "+cmd[0]+" finished")
 
 
+def check_no_duplicate_fasta_id(fasta_fp):
+    ids = set()
+    for seq in skbio.io.read(fasta_fp, format='fasta',
+                             constructor=skbio.DNA):
+        fasta_id = seq.metadata['id']
+        if fasta_id in ids:
+            raise ValueError(
+                "Duplicate FastA ID '%' in file '%'"
+                % (id))
+        ids.add(fasta_id)
+
+
 def sina(sequences: DNAFASTAFormat,
          reference: AlignedDNAFASTAFormat=None,
          arb_reference: Str=None,
@@ -45,19 +57,9 @@ def sina(sequences: DNAFASTAFormat,
 
     aligned = AlignedDNAFASTAFormat()
 
-    # Guard against duplicate IDs
-    ids = set()
-    for seq in skbio.io.read(str(sequences), format='fasta',
-                             constructor=skbio.DNA):
-        fasta_id = seq.metadata['id']
-        if fasta_id in ids:
-            raise ValueError(
-                "Encountered duplicate sequence ID in unaligned sequences: %r"
-                % id)
-        ids.add(fasta_id)
-
     with TemporaryDirectory() as tmpdir:
         if not arb_reference:  # Convert QZA aligned FAST to ARB
+            check_no_duplicate_fasta_id(fasta_fp)
             arb_reference = op.join(tmpdir, "reference.arb")
             _run_command([
                 "sina",
