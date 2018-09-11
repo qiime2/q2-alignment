@@ -6,25 +6,43 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import os.path as op
 import subprocess as sp
+from tempfile import TemporaryDirectory
+
+import click
 
 from q2_types.feature_data import AlignedDNAFASTAFormat, DNAFASTAFormat
+from qiime2.plugin import Str
 
 import skbio
 import skbio.io
 
+def _run_command(cmd):
+    sp.run(cmd, check=True)
 
 def sina(sequences: DNAFASTAFormat,
-         reference: DNAFASTAFormat,
-         n_threads: int=1) -> AlignedDNAFASTAFormat:
-    unaligned_fp = str(sequences)
-    reference_fp = str(reference)
+         reference: AlignedDNAFASTAFormat=None,
+         arb_reference: Str=None) -> AlignedDNAFASTAFormat:
+    if not reference and not arb_reference:
+        raise ValueError(
+            "SINA needs a reference alignment.\n\n"
+            "Please use either\n"
+            "    '--i-reference=reference.qza'\n"
+            "  or\n"
+            "    '--p-arb-reference=reference.arb'\n"
+            "to indicate the reference alignent you wish to use."
+        )
+    if reference and arb_reference:
+        raise ValueError(
+            "Only either -i-reference or --p-arb-reference may be specified"
+        )
+
     aligned = AlignedDNAFASTAFormat()
-    aligned_fp = str(aligned)
 
     # Guard against duplicate IDs
     ids = set()
-    for seq in skbio.io.read(unaligned_fp, format='fasta',
+    for seq in skbio.io.read(str(sequences), format='fasta',
                              constructor=skbio.DNA):
         fasta_id = seq.metadata['id']
         if fasta_id in ids:
@@ -33,15 +51,26 @@ def sina(sequences: DNAFASTAFormat,
                 % id)
         ids.add(fasta_id)
 
-    cmd = [
-        "sina",
-        "--intype", "FASTA"
-        "--in", unaligned_fp,
-        "--outtype", "FASTA",
-        "--out", aligned_fp,
-        "--ptdb", reference_fp
-    ]
+    with TemporaryDirectory() as tmpdir:
+        if not arb_reference:  # Convert QZA aligned FAST to ARB
+            arb_reference = op.join(tmpdir, "reference.arb")
+            _run_command([
+                "sina",
+                "--intype", "FASTA",
+                "--in", str(reference),
+                "--outtype", "ARB",
+                "--out", arb_reference,
+                "--prealigned",
+            ])
 
-    sp.run(cmd, check=True)
+        _run_command([
+            "sina",
+            "--intype", "FASTA",
+            "--in", str(sequences),
+            "--outtype", "FASTA",
+            "--out", str(aligned),
+            "--fasta-write-dna",
+            "--ptdb", arb_reference,
+        ])
 
     return aligned
