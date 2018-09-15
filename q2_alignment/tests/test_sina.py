@@ -1,10 +1,14 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2018, Elmar Pruesse.
+# Copyright (c) 2018, QIIME 2 development team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
+
+__author__ = "Elmar Pruesse"
+__copyright__ = "Copyright (c) 2018, Elmar Pruesse"
+
 import os
 import unittest
 
