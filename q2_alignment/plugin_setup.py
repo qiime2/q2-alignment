@@ -57,7 +57,7 @@ plugin.methods.register_function(
     parameter_descriptions={
         'arb_reference': 'The reference alignment (ARB format).',
         'num_references': 'The number of reference sequences used to '
-                          'align each sequence.'
+                          'align each sequence.',
         'kmer_len': 'The size of K used in reference search. '
                     'Use 6-8 for sequences <150bp. '
                     'Use 10 for full length 16S. '},

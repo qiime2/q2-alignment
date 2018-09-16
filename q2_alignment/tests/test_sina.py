@@ -67,5 +67,6 @@ class SINATests(TestPluginBase):
         avg_match_frequency = sum_match_f / count
         self.assertTrue(avg_match_frequency > 0.995)
 
+
 if __name__ == "__main__":
     unittest.main()

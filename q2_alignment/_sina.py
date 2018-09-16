@@ -13,8 +13,6 @@ import os.path as op
 import subprocess as sp
 from tempfile import TemporaryDirectory
 
-import click
-
 from q2_types.feature_data import AlignedDNAFASTAFormat, DNAFASTAFormat
 from qiime2.plugin import Int, Str
 
@@ -63,7 +61,7 @@ def sina(sequences: DNAFASTAFormat,
 
     with TemporaryDirectory() as tmpdir:
         if not arb_reference:  # Convert QZA aligned FAST to ARB
-            check_no_duplicate_fasta_id(fasta_fp)
+            check_no_duplicate_fasta_id(str(reference))
             arb_reference = op.join(tmpdir, "reference.arb")
             _run_command([
                 "sina",
