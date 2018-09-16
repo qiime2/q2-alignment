@@ -7,7 +7,6 @@
 # ----------------------------------------------------------------------------
 
 __author__ = "Elmar Pruesse"
-__copyright__ = "Copyright (c) 2018, Elmar Pruesse"
 
 import os
 import unittest
