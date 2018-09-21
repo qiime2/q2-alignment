@@ -90,5 +90,6 @@ class SINATests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 sina(query)
 
+
 if __name__ == "__main__":
     unittest.main()
