@@ -66,6 +66,29 @@ class SINATests(TestPluginBase):
         avg_match_frequency = sum_match_f / count
         self.assertTrue(avg_match_frequency > 0.995)
 
+    def test_duplicate_input_ids(self):
+        input_fp = self.get_data_path('aligned_dna.fasta')
+        input_sequences = AlignedDNAFASTAFormat(input_fp, mode='r')
+        ref = AlignedDNAFASTAFormat()
+        msa = TabularMSA.read(str(input_sequences), constructor=DNA)
+        ref_msa = msa[0:3]
+        ref_msa.extend(msa[0:1], index=msa.index[4:5])
+        ref_msa.write(ref.open())
+        query = DNAFASTAFormat()
+        msa[6].degap().write(query.open())
+
+        with self.assertRaisesRegex(ValueError, 'Duplicate.*AceElong'):
+            with redirected_stdio(stderr=os.devnull):
+                sina(query, ref)
+
+    def test_params(self):
+        ref, query, exp = next(self._prepare_sequence_data())
+        with self.assertRaisesRegex(ValueError, 'Only either'):
+            with redirected_stdio(stderr=os.devnull):
+                sina(query, ref, str(ref))
+        with self.assertRaisesRegex(ValueError, 'needs a reference'):
+            with redirected_stdio(stderr=os.devnull):
+                sina(query)
 
 if __name__ == "__main__":
     unittest.main()

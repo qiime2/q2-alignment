@@ -25,15 +25,15 @@ def _run_command(cmd):
     print("# Command "+cmd[0]+" finished")
 
 
-def check_no_duplicate_fasta_id(fasta_fp):
+def check_no_duplicate_fasta_id(fasta_fp, msg="reference"):
     ids = set()
     for seq in skbio.io.read(fasta_fp, format='fasta',
                              constructor=skbio.DNA):
         fasta_id = seq.metadata['id']
         if fasta_id in ids:
             raise ValueError(
-                "Duplicate FastA ID '%' in file '%'"
-                % (id))
+                "Duplicate FastA ID '%s' in %s" %
+                (fasta_id, msg))
         ids.add(fasta_id)
 
 
