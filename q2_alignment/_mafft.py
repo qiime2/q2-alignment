@@ -28,8 +28,8 @@ def run_command(cmd, output_fp, verbose=True):
 
 
 def mafft(sequences: DNAFASTAFormat,
-          n_threads: int=1,
-          parttree: bool=False) -> AlignedDNAFASTAFormat:
+          n_threads: int = 1,
+          parttree: bool = False) -> AlignedDNAFASTAFormat:
     unaligned_fp = str(sequences)
 
     # Save original sequence IDs since long ids (~250 chars) can be truncated
