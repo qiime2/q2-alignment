@@ -60,8 +60,8 @@ def _compute_frequencies(alignment):
                 for c in alignment.iter_positions()]
 
 
-def mask(alignment: skbio.TabularMSA, max_gap_frequency: float=1.0,
-         min_conservation: float=0.40) -> skbio.TabularMSA:
+def mask(alignment: skbio.TabularMSA, max_gap_frequency: float = 1.0,
+         min_conservation: float = 0.40) -> skbio.TabularMSA:
     # check that parameters are in range
     if max_gap_frequency < 0.0 or max_gap_frequency > 1.0:
         raise ValueError('max_gap_frequency out of range [0.0, 1.0]: %f' %
