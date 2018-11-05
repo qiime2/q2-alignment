@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from textwrap import dedent
 
 from qiime2.plugin import Plugin, Float, Int, Bool, Str, Range, Citations
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
@@ -52,7 +51,9 @@ plugin.methods.register_function(
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={
         'sequences': 'The sequences to be aligned.',
-        'reference': 'The reference alignment (QZA format).',
+        'reference': 'The reference alignment (QZA format) - an ARB database '
+                     'can alternatively be provided using the arb_reference '
+                     'parameter.',
     },
     parameter_descriptions={
         'arb_reference': 'The reference alignment (ARB format).',
@@ -63,13 +64,8 @@ plugin.methods.register_function(
                     'Use 10 for full length 16S. '},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='Reference based multiple sequence alignment with SINA',
-    description=dedent("""
-    Perform reference based multiple sequence alignment using SINA.
-
-    Note:
-    To use a reference database in ARB format without QZA conversion,
-    use the --p-arb-reference parameter instead of --i-reference.
-    """),
+    description='Perform reference based multiple sequence alignment using '
+                'SINA.'),
     citations=[citations['pruesse2012sina']]
 )
 
