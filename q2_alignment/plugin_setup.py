@@ -65,7 +65,7 @@ plugin.methods.register_function(
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='Reference based multiple sequence alignment with SINA',
     description='Perform reference based multiple sequence alignment using '
-                'SINA.'),
+                'SINA.',
     citations=[citations['pruesse2012sina']]
 )
 
