@@ -64,8 +64,8 @@ plugin.methods.register_function(
                     'Use 10 for full length 16S. '},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='Reference based multiple sequence alignment with SINA',
-    description='Perform reference based multiple sequence alignment using '
-                'SINA.',
+    description=('Perform reference based multiple sequence alignment using '
+                 'SINA.'),
     citations=[citations['pruesse2012sina']]
 )
 
