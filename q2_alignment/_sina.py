@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-__author__ = "Elmar Pruesse"
 
 import os.path as op
 import subprocess as sp
