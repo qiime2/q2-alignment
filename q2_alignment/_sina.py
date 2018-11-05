@@ -58,7 +58,7 @@ def sina(sequences: DNAFASTAFormat,
     aligned = AlignedDNAFASTAFormat()
 
     with TemporaryDirectory() as tmpdir:
-        if not arb_reference:  # Convert QZA aligned FAST to ARB
+        if not arb_reference:  # Convert QZA aligned FASTA to ARB
             check_no_duplicate_fasta_id(str(reference))
             arb_reference = op.join(tmpdir, "reference.arb")
             _run_command([
