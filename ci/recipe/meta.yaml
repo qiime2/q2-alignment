@@ -19,7 +19,6 @@ requirements:
 
   run:
     - python {{ python }}
-    - setuptools
     - scikit-bio
     - qiime2 {{ release }}.*
     - q2-types {{ release }}.*
