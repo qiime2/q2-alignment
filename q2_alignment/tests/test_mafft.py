@@ -45,7 +45,7 @@ class MafftTests(TestPluginBase):
         input_sequences, exp = self._prepare_sequence_data()
 
         with redirected_stdio(stderr=os.devnull):
-            result = mafft(input_sequences, n_threads=0)
+            result = mafft(input_sequences, n_threads='auto')
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
