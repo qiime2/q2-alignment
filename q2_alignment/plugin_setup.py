@@ -42,6 +42,29 @@ plugin.methods.register_function(
 )
 
 plugin.methods.register_function(
+    function=q2_alignment.mafft_add,
+    inputs={'alignment': FeatureData[AlignedSequence],
+            'sequences': FeatureData[Sequence]},
+    parameters={'n_threads': Int % Range(1, None) | Str % Choices(['auto']),
+                'parttree': Bool},
+    outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
+    input_descriptions={'alignment': 'The alignment to which '
+                                     'sequences should be added.',
+                        'sequences': 'The sequences to be added.'},
+    parameter_descriptions={
+        'n_threads': 'The number of threads. (Use `auto` to automatically use '
+                     'all available cores)',
+        'parttree': 'This flag is required if the number of sequences being '
+                    'aligned are larger than 1000000. Disabled by default'},
+    output_descriptions={'expanded_alignment': 
+                            'Alignment containing the provided aligned and '
+                            'unaligned sequences.'},
+    name='Add sequences to multiple sequence alignment with MAFFT.',
+    description='Add new sequences to an existing alignment with MAFFT.',
+    citations=[citations['katoh2013mafft']]
+)
+
+plugin.methods.register_function(
     function=q2_alignment.mask,
     inputs={'alignment': FeatureData[AlignedSequence]},
     parameters={'max_gap_frequency': Float % Range(0, 1, inclusive_end=True),

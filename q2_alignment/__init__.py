@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from ._mafft import mafft
+from ._mafft import mafft, mafft_add
 from ._filter import mask
 from ._version import get_versions
 
@@ -14,4 +14,4 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-__all__ = ['mafft', 'mask']
+__all__ = ['mafft', 'mask', 'mafft_add']

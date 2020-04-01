@@ -27,11 +27,7 @@ def run_command(cmd, output_fp, verbose=True):
         subprocess.run(cmd, stdout=output_f, check=True)
 
 
-def mafft(sequences: DNAFASTAFormat,
-          n_threads: int = 1,
-          parttree: bool = False) -> AlignedDNAFASTAFormat:
-    unaligned_fp = str(sequences)
-
+def _mafft(sequences_fp, alignment_fp, n_threads, parttree):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -41,7 +37,18 @@ def mafft(sequences: DNAFASTAFormat,
     # Note: using OrderedDict to maintain order of IDs and have quick lookup
     # for duplicates.
     ids = collections.OrderedDict()
-    for seq in skbio.io.read(unaligned_fp, format='fasta',
+    if alignment_fp is not None:
+        for seq in skbio.io.read(alignment_fp, format='fasta',
+                                constructor=skbio.DNA):
+            id = seq.metadata['id']
+            if id in ids:
+                raise ValueError(
+                    "Encountered duplicate sequence ID in aligned sequences: %r"
+                    % id)
+            else:
+                ids[id] = True
+
+    for seq in skbio.io.read(sequences_fp, format='fasta',
                              constructor=skbio.DNA):
         id = seq.metadata['id']
         if id in ids:
@@ -52,7 +59,7 @@ def mafft(sequences: DNAFASTAFormat,
             ids[id] = True
 
     result = AlignedDNAFASTAFormat()
-    aligned_fp = str(result)
+    result_fp = str(result)
 
     # mafft will fail if the number of sequences is larger than 1 million.
     # mafft requires using parttree which is an algorithm to build an
@@ -67,7 +74,7 @@ def mafft(sequences: DNAFASTAFormat,
             "1 million, please use the parttree parameter")
 
     # mafft's signal for utilizing all cores is -1. We want to our users
-    # to enter 0 for using all cores. This is to prevent any confusion and
+    # to enter auto for using all cores. This is to prevent any confusion and
     # to keep the UX consisent.
     if n_threads == 'auto':
         n_threads = -1
@@ -81,12 +88,16 @@ def mafft(sequences: DNAFASTAFormat,
     if parttree:
         cmd += ['--parttree']
 
-    cmd += [unaligned_fp]
-    run_command(cmd, aligned_fp)
+    if alignment_fp is not None:
+        cmd += ['--add', sequences_fp, alignment_fp]
+    else:
+        cmd += [sequences_fp]
+
+    run_command(cmd, result_fp)
 
     # Read output alignment into memory, reassign original sequence IDs, and
     # write alignment back to disk.
-    msa = skbio.TabularMSA.read(aligned_fp, format='fasta',
+    msa = skbio.TabularMSA.read(result_fp, format='fasta',
                                 constructor=skbio.DNA)
     # Using `assert` because mafft would have had to add or drop sequences
     # while aligning, which would be a bug on mafft's end. This is just a
@@ -101,6 +112,20 @@ def mafft(sequences: DNAFASTAFormat,
     #
     # http://scikit-bio.org/docs/latest/generated/
     #     skbio.io.format.fasta.html#writer-specific-parameters
-    msa.write(aligned_fp, id_whitespace_replacement=None,
+    msa.write(result_fp, id_whitespace_replacement=None,
               description_newline_replacement=None)
     return result
+
+def mafft(sequences: DNAFASTAFormat,
+          n_threads: int = 1,
+          parttree: bool = False) -> AlignedDNAFASTAFormat:
+    sequences_fp = str(sequences)
+    return _mafft(sequences_fp, None, n_threads, parttree)
+
+def mafft_add(alignment:AlignedDNAFASTAFormat,
+              sequences: DNAFASTAFormat,
+              n_threads: int = 1,
+              parttree: bool = False) -> AlignedDNAFASTAFormat:
+    alignment_fp = str(alignment)
+    sequences_fp = str(sequences)
+    return _mafft(sequences_fp, alignment_fp, n_threads, parttree)

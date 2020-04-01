@@ -14,7 +14,7 @@ from qiime2.plugin.testing import TestPluginBase
 from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
 from qiime2.util import redirected_stdio
 
-from q2_alignment import mafft
+from q2_alignment import mafft, mafft_add
 from q2_alignment._mafft import run_command
 
 
@@ -82,6 +82,33 @@ class MafftTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
+
+class MafftAddTests(TestPluginBase):
+
+    package = 'q2_alignment.tests'
+
+    def _prepare_sequence_data(self):
+        sequences_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
+        sequences = DNAFASTAFormat(sequences_fp, mode='r')
+        alignment_fp = self.get_data_path('aligned-dna-sequences-1.fasta')
+        alignment = AlignedDNAFASTAFormat(alignment_fp, mode='r')
+        exp = skbio.TabularMSA(
+            [skbio.DNA('AGGGGG-', metadata={'id': 'aln-seq-1', 'description': ''}),
+             skbio.DNA('AGGGGGG', metadata={'id': 'aln-seq-2', 'description': ''}),
+             skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
+        )
+
+        return alignment, sequences, exp
+
+    def test_mafft_add(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
 
 class RunCommandTests(TestPluginBase):
 
