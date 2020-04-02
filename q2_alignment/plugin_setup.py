@@ -56,9 +56,9 @@ plugin.methods.register_function(
                      'all available cores)',
         'parttree': 'This flag is required if the number of sequences being '
                     'aligned are larger than 1000000. Disabled by default'},
-    output_descriptions={'expanded_alignment': 
-                            'Alignment containing the provided aligned and '
-                            'unaligned sequences.'},
+    output_descriptions={
+        'expanded_alignment': 'Alignment containing the provided aligned and '
+                              'unaligned sequences.'},
     name='Add sequences to multiple sequence alignment with MAFFT.',
     description='Add new sequences to an existing alignment with MAFFT.',
     citations=[citations['katoh2013mafft']]

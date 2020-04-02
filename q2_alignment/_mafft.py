@@ -32,18 +32,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree):
     # mafft with the originals.
     #
     # https://github.com/qiime2/q2-alignment/issues/37
-    #
-    # Note: using OrderedDict to maintain order of IDs and have quick lookup
-    # for duplicates.
     ids = {}
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
-                                constructor=skbio.DNA):
+                                 constructor=skbio.DNA):
             id = seq.metadata['id']
             if id in ids:
                 raise ValueError(
-                    "Encountered duplicate sequence ID in aligned sequences: %r"
-                    % id)
+                    "Encountered duplicate sequence ID in aligned sequences: "
+                    "%r" % id)
             else:
                 ids[id] = True
 
@@ -115,13 +112,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree):
               description_newline_replacement=None)
     return result
 
+
 def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
     return _mafft(sequences_fp, None, n_threads, parttree)
 
-def mafft_add(alignment:AlignedDNAFASTAFormat,
+
+def mafft_add(alignment: AlignedDNAFASTAFormat,
               sequences: DNAFASTAFormat,
               n_threads: int = 1,
               parttree: bool = False) -> AlignedDNAFASTAFormat:

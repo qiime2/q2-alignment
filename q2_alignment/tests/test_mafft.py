@@ -93,10 +93,14 @@ class MafftAddTests(TestPluginBase):
         alignment_fp = self.get_data_path('aligned-dna-sequences-1.fasta')
         alignment = AlignedDNAFASTAFormat(alignment_fp, mode='r')
         exp = skbio.TabularMSA(
-            [skbio.DNA('AGGGGG-', metadata={'id': 'aln-seq-1', 'description': ''}),
-             skbio.DNA('AGGGGGG', metadata={'id': 'aln-seq-2', 'description': ''}),
-             skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
-             skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
+            [skbio.DNA('AGGGGG-',
+                       metadata={'id': 'aln-seq-1', 'description': ''}),
+             skbio.DNA('AGGGGGG',
+                       metadata={'id': 'aln-seq-2', 'description': ''}),
+             skbio.DNA('AGGGGGG',
+                       metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('-GGGGGG',
+                       metadata={'id': 'seq2', 'description': ''})]
         )
 
         return alignment, sequences, exp
@@ -174,6 +178,7 @@ class MafftAddTests(TestPluginBase):
         self.assertIn('b'*250, obs)
         self.assertIn('seq1', obs)
         self.assertIn('seq2', obs)
+
 
 class RunCommandTests(TestPluginBase):
 
