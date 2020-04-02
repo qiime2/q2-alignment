@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import collections
 import subprocess
 
 import skbio
@@ -36,7 +35,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree):
     #
     # Note: using OrderedDict to maintain order of IDs and have quick lookup
     # for duplicates.
-    ids = collections.OrderedDict()
+    ids = {}
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
                                 constructor=skbio.DNA):
