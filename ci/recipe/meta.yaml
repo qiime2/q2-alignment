@@ -22,7 +22,7 @@ requirements:
     - scikit-bio
     - qiime2 {{ release }}.*
     - q2-types {{ release }}.*
-    - mafft >=7.310
+    - mafft >=7.394
     - sina >=1.3.5,<=2
 
 test:
