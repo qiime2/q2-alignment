@@ -32,30 +32,37 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree):
     # mafft with the originals.
     #
     # https://github.com/qiime2/q2-alignment/issues/37
-    ids = {}
+    aligned_seq_ids = {}
+    unaligned_seq_ids = {}
+
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
                                  constructor=skbio.DNA):
-            id = seq.metadata['id']
-            if id in ids:
+            id_ = seq.metadata['id']
+            if id_ in aligned_seq_ids:
                 raise ValueError(
-                    "Encountered duplicate sequence ID in aligned sequences: "
-                    "%r" % id)
+                    "A sequence ID is duplicated in the aligned sequences: "
+                    "%r" % id_)
             else:
-                ids[id] = True
+                aligned_seq_ids[id_] = True
 
     for seq in skbio.io.read(sequences_fp, format='fasta',
                              constructor=skbio.DNA):
-        id = seq.metadata['id']
-        if id in ids:
+        id_ = seq.metadata['id']
+        if id_ in unaligned_seq_ids:
             raise ValueError(
-                "Encountered duplicate sequence ID in unaligned sequences: %r"
-                % id)
+                "A sequence ID is duplicated in the unaligned sequences: "
+                "%r" % id_)
+        elif id_ in aligned_seq_ids:
+            raise ValueError(
+                "A sequence ID is present in both the aligned and unaligned "
+                "sequences: %r" % id_)
         else:
-            ids[id] = True
+            unaligned_seq_ids[id_] = True
 
     result = AlignedDNAFASTAFormat()
     result_fp = str(result)
+    ids = {**aligned_seq_ids, **unaligned_seq_ids}
 
     # mafft will fail if the number of sequences is larger than 1 million.
     # mafft requires using parttree which is an algorithm to build an

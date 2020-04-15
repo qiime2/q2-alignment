@@ -68,7 +68,7 @@ class MafftTests(TestPluginBase):
         input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
         input_sequences = DNAFASTAFormat(input_fp, mode='r')
 
-        with self.assertRaisesRegex(ValueError, 'duplicate.*id1'):
+        with self.assertRaisesRegex(ValueError, 'the unaligned.*id1'):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
@@ -120,7 +120,7 @@ class MafftAddTests(TestPluginBase):
 
         alignment, _, _ = self._prepare_sequence_data()
 
-        with self.assertRaisesRegex(ValueError, 'duplicate.*id1'):
+        with self.assertRaisesRegex(ValueError, 'the unaligned.*id1'):
             with redirected_stdio(stderr=os.devnull):
                 mafft_add(alignment, sequences)
 
@@ -130,7 +130,7 @@ class MafftAddTests(TestPluginBase):
 
         _, sequences, _ = self._prepare_sequence_data()
 
-        with self.assertRaisesRegex(ValueError, 'duplicate.*id1'):
+        with self.assertRaisesRegex(ValueError, 'the aligned.*id1'):
             with redirected_stdio(stderr=os.devnull):
                 mafft_add(alignment, sequences)
 
@@ -140,7 +140,7 @@ class MafftAddTests(TestPluginBase):
 
         _, sequences, _ = self._prepare_sequence_data()
 
-        with self.assertRaisesRegex(ValueError, 'duplicate.*seq1'):
+        with self.assertRaisesRegex(ValueError, 'aligned and unaligned.*seq1'):
             with redirected_stdio(stderr=os.devnull):
                 mafft_add(alignment, sequences)
 
