@@ -14,7 +14,7 @@ from qiime2.plugin.testing import TestPluginBase
 from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
 from qiime2.util import redirected_stdio
 
-from q2_alignment import mafft
+from q2_alignment import mafft, mafft_add
 from q2_alignment._mafft import run_command
 
 
@@ -68,7 +68,7 @@ class MafftTests(TestPluginBase):
         input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
         input_sequences = DNAFASTAFormat(input_fp, mode='r')
 
-        with self.assertRaisesRegex(ValueError, 'duplicate.*id1'):
+        with self.assertRaisesRegex(ValueError, 'the unaligned.*id1'):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
@@ -81,6 +81,103 @@ class MafftTests(TestPluginBase):
         with self.assertRaisesRegex(ValueError, '1 million'):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
+
+
+class MafftAddTests(TestPluginBase):
+
+    package = 'q2_alignment.tests'
+
+    def _prepare_sequence_data(self):
+        sequences_fp = self.get_data_path('unaligned-dna-sequences-1.fasta')
+        sequences = DNAFASTAFormat(sequences_fp, mode='r')
+        alignment_fp = self.get_data_path('aligned-dna-sequences-1.fasta')
+        alignment = AlignedDNAFASTAFormat(alignment_fp, mode='r')
+        exp = skbio.TabularMSA(
+            [skbio.DNA('AGGGGG-',
+                       metadata={'id': 'aln-seq-1', 'description': ''}),
+             skbio.DNA('AGGGGGG',
+                       metadata={'id': 'aln-seq-2', 'description': ''}),
+             skbio.DNA('AGGGGGG',
+                       metadata={'id': 'seq1', 'description': ''}),
+             skbio.DNA('-GGGGGG',
+                       metadata={'id': 'seq2', 'description': ''})]
+        )
+
+        return alignment, sequences, exp
+
+    def test_mafft_add(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_duplicate_input_ids_in_unaligned(self):
+        input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
+        sequences = DNAFASTAFormat(input_fp, mode='r')
+
+        alignment, _, _ = self._prepare_sequence_data()
+
+        with self.assertRaisesRegex(ValueError, 'the unaligned.*id1'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft_add(alignment, sequences)
+
+    def test_duplicate_input_ids_in_aligned(self):
+        input_fp = self.get_data_path('aligned-duplicate-ids-1.fasta')
+        alignment = DNAFASTAFormat(input_fp, mode='r')
+
+        _, sequences, _ = self._prepare_sequence_data()
+
+        with self.assertRaisesRegex(ValueError, 'the aligned.*id1'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft_add(alignment, sequences)
+
+    def test_duplicate_input_ids_across_aligned_and_unaligned(self):
+        input_fp = self.get_data_path('aligned-duplicate-ids-2.fasta')
+        alignment = DNAFASTAFormat(input_fp, mode='r')
+
+        _, sequences, _ = self._prepare_sequence_data()
+
+        with self.assertRaisesRegex(ValueError, 'aligned and unaligned.*seq1'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft_add(alignment, sequences)
+
+    def test_long_ids_are_not_truncated_unaligned(self):
+        input_fp = self.get_data_path('unaligned-long-ids.fasta')
+        sequences = DNAFASTAFormat(input_fp, mode='r')
+
+        alignment, _, _ = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences)
+
+        with open(str(result), 'r') as fh:
+            obs = fh.read()
+
+        self.assertIn('a'*250, obs)
+        self.assertIn('b'*250, obs)
+        self.assertIn('c'*250, obs)
+        self.assertIn('aln-seq-1', obs)
+        self.assertIn('aln-seq-2', obs)
+
+    def test_long_ids_are_not_truncated_aligned(self):
+        input_fp = self.get_data_path('aligned-long-ids.fasta')
+        alignment = DNAFASTAFormat(input_fp, mode='r')
+
+        _, sequences, _ = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences)
+
+        with open(str(result), 'r') as fh:
+            obs = fh.read()
+
+        self.assertIn('a'*250, obs)
+        self.assertIn('b'*250, obs)
+        self.assertIn('seq1', obs)
+        self.assertIn('seq2', obs)
 
 
 class RunCommandTests(TestPluginBase):
