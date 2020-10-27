@@ -46,7 +46,8 @@ plugin.methods.register_function(
     inputs={'alignment': FeatureData[AlignedSequence],
             'sequences': FeatureData[Sequence]},
     parameters={'n_threads': Int % Range(1, None) | Str % Choices(['auto']),
-                'parttree': Bool},
+                'parttree': Bool,
+                'fragments': Bool},
     outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
@@ -55,7 +56,9 @@ plugin.methods.register_function(
         'n_threads': 'The number of threads. (Use `auto` to automatically use '
                      'all available cores)',
         'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default'},
+                    'aligned are larger than 1000000. Disabled by default',
+        'fragments': 'This flag indicates that alignment optimized for '
+                     'addition of fragmentary sequences should be used.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},
