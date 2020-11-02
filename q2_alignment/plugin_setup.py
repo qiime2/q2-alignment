@@ -59,7 +59,8 @@ plugin.methods.register_function(
                     'aligned are larger than 1000000. Disabled by default',
         'addfragments': 'Optimize for the addition of short sequence '
                         'fragments (for example, primer or amplicon '
-                        'sequences).'},
+                        'sequences). If not set, default sequence addition '
+                        'is used.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},
