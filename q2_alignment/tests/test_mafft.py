@@ -117,7 +117,7 @@ class MafftAddTests(TestPluginBase):
         alignment, sequences, exp = self._prepare_sequence_data()
 
         with redirected_stdio(stderr=os.devnull):
-            result = mafft_add(alignment, sequences, fragments=True)
+            result = mafft_add(alignment, sequences, addfragments=True)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
@@ -133,7 +133,7 @@ class MafftAddTests(TestPluginBase):
                     ["mafft", "--preservecase", "--inputorder", "--thread",
                      "1", "--add", ANY, ANY], ANY)
 
-                _ = mafft_add(alignment, sequences, fragments=True)
+                _ = mafft_add(alignment, sequences, addfragments=True)
                 patched_run_cmd.assert_called_with(
                     ["mafft", "--preservecase", "--inputorder", "--thread",
                      "1", "--addfragments", ANY, ANY], ANY)
