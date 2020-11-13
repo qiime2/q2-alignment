@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 import os
 import unittest
+from unittest.mock import patch, ANY
 import subprocess
 
 import skbio
@@ -19,7 +20,6 @@ from q2_alignment._mafft import run_command
 
 
 class MafftTests(TestPluginBase):
-
     package = 'q2_alignment.tests'
 
     def _prepare_sequence_data(self):
@@ -84,7 +84,6 @@ class MafftTests(TestPluginBase):
 
 
 class MafftAddTests(TestPluginBase):
-
     package = 'q2_alignment.tests'
 
     def _prepare_sequence_data(self):
@@ -113,6 +112,31 @@ class MafftAddTests(TestPluginBase):
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
+
+    def test_mafft_add_fragments(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences, addfragments=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_flags(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with patch('q2_alignment._mafft.run_command') as patched_run_cmd:
+            with patch('q2_alignment._mafft.skbio.TabularMSA.read',
+                       return_value=exp):
+                _ = mafft_add(alignment, sequences)
+                patched_run_cmd.assert_called_with(
+                    ["mafft", "--preservecase", "--inputorder", "--thread",
+                     "1", "--add", ANY, ANY], ANY)
+
+                _ = mafft_add(alignment, sequences, addfragments=True)
+                patched_run_cmd.assert_called_with(
+                    ["mafft", "--preservecase", "--inputorder", "--thread",
+                     "1", "--addfragments", ANY, ANY], ANY)
 
     def test_duplicate_input_ids_in_unaligned(self):
         input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
@@ -181,7 +205,6 @@ class MafftAddTests(TestPluginBase):
 
 
 class RunCommandTests(TestPluginBase):
-
     package = 'q2_alignment.tests'
 
     def test_failed_run(self):
