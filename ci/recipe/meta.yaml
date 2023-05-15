@@ -24,6 +24,9 @@ requirements:
     - mafft >=7.394
 
 test:
+commands:
+    - py.test --pyargs q2_alignment
+
   requires:
     - qiime2 >={{ qiime2 }}
     - q2-types >={{ q2_types }}
