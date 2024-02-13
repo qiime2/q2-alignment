@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 
 from qiime2.plugin import (
-    Plugin, Float, Int, Bool, Range, Citations, Str, Choices)
+    Plugin, Float, Bool, Range, Citations, Threads)
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
@@ -26,7 +26,7 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Int % Range(1, None) | Str % Choices(['auto']),
+    parameters={'n_threads': Threads,
                 'parttree': Bool},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
@@ -45,7 +45,7 @@ plugin.methods.register_function(
     function=q2_alignment.mafft_add,
     inputs={'alignment': FeatureData[AlignedSequence],
             'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Int % Range(1, None) | Str % Choices(['auto']),
+    parameters={'n_threads': Threads,
                 'parttree': Bool,
                 'addfragments': Bool},
     outputs=[('expanded_alignment', FeatureData[AlignedSequence])],

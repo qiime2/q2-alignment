@@ -79,7 +79,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments):
     # mafft's signal for utilizing all cores is -1. We want to our users
     # to enter auto for using all cores. This is to prevent any confusion and
     # to keep the UX consisent.
-    if n_threads == 'auto':
+    if n_threads == 0:
         n_threads = -1
 
     # `--inputorder` must be turned on because we need the input and output in
