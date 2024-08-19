@@ -26,7 +26,8 @@ def run_command(cmd, output_fp, verbose=True):
         subprocess.run(cmd, stdout=output_f, check=True)
 
 
-def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments):
+def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
+           keeplength):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -91,9 +92,13 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments):
     if parttree:
         cmd += ['--parttree']
 
+    if keeplength is not None:
+        cmd += ['--keeplength']
+
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
         cmd += [add_flag, sequences_fp, alignment_fp]
+
     else:
         cmd += [sequences_fp]
 
@@ -132,8 +137,10 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               sequences: DNAFASTAFormat,
               n_threads: int = 1,
               parttree: bool = False,
-              addfragments: bool = False) -> AlignedDNAFASTAFormat:
+              addfragments: bool = False,
+              keeplength: bool = False) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(
-        sequences_fp, alignment_fp, n_threads, parttree, addfragments)
+        sequences_fp, alignment_fp, n_threads, parttree, addfragments,
+        keeplength)
