@@ -92,7 +92,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     if parttree:
         cmd += ['--parttree']
 
-    if keeplength is not None:
+    if keeplength:
         cmd += ['--keeplength']
 
     if alignment_fp is not None:
@@ -130,7 +130,7 @@ def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
-    return _mafft(sequences_fp, None, n_threads, parttree, False)
+    return _mafft(sequences_fp, None, n_threads, parttree, False, False)
 
 
 def mafft_add(alignment: AlignedDNAFASTAFormat,
