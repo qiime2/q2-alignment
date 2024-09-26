@@ -104,6 +104,45 @@ class MafftAddTests(TestPluginBase):
 
         return alignment, sequences, exp
 
+    def _prepare_sequence_data_2(self):
+        # for new alignment using `--keeplength` parameter
+        sequences_fp = self.get_data_path('unaligned-dna-sequences-2.fasta')
+        sequences = DNAFASTAFormat(sequences_fp, mode='r')
+        alignment_fp = self.get_data_path('aligned-dna-sequences-2.fasta')
+        alignment = AlignedDNAFASTAFormat(alignment_fp, mode='r')
+        exp = skbio.TabularMSA(
+            [skbio.DNA('AGGG-GGC',
+                       metadata={'id': 'aln-seq-1', 'description': ''}),
+             skbio.DNA('AGGGTGGC',
+                       metadata={'id': 'aln-seq-2', 'description': ''}),
+             skbio.DNA('AGGTTGGC',
+                       metadata={'id': 'seq-3', 'description': ''}),
+             skbio.DNA('AGGATGGC',
+                       metadata={'id': 'seq-4', 'description': ''})]
+        )
+
+        return alignment, sequences, exp
+
+    def _prepare_sequence_data_3(self):
+        # NOT using `--keeplength` parameter. To compare with
+        # _prepare_sequence_data_2 output
+        sequences_fp = self.get_data_path('unaligned-dna-sequences-2.fasta')
+        sequences = DNAFASTAFormat(sequences_fp, mode='r')
+        alignment_fp = self.get_data_path('aligned-dna-sequences-2.fasta')
+        alignment = AlignedDNAFASTAFormat(alignment_fp, mode='r')
+        exp = skbio.TabularMSA(
+            [skbio.DNA('AGG--G---GGC',
+                       metadata={'id': 'aln-seq-1', 'description': ''}),
+             skbio.DNA('AGG--G--TGGC',
+                       metadata={'id': 'aln-seq-2', 'description': ''}),
+             skbio.DNA('AGG--TTTTGGC',
+                       metadata={'id': 'seq-3', 'description': ''}),
+             skbio.DNA('AGGTTA--TGGC',
+                       metadata={'id': 'seq-4', 'description': ''})]
+        )
+
+        return alignment, sequences, exp
+
     def test_mafft_add(self):
         alignment, sequences, exp = self._prepare_sequence_data()
 
@@ -118,6 +157,26 @@ class MafftAddTests(TestPluginBase):
 
         with redirected_stdio(stderr=os.devnull):
             result = mafft_add(alignment, sequences, addfragments=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_fragments_keeplength(self):
+        alignment, sequences, exp = self._prepare_sequence_data_2()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences, addfragments=True,
+                               keeplength=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_fragments_no_keeplength(self):
+        alignment, sequences, exp = self._prepare_sequence_data_3()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences, addfragments=True,
+                               keeplength=False)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)

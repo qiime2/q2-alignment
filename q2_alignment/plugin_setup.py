@@ -47,7 +47,8 @@ plugin.methods.register_function(
             'sequences': FeatureData[Sequence]},
     parameters={'n_threads': Threads,
                 'parttree': Bool,
-                'addfragments': Bool},
+                'addfragments': Bool,
+                'keeplength': Bool},
     outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
@@ -60,7 +61,12 @@ plugin.methods.register_function(
         'addfragments': 'Optimize for the addition of short sequence '
                         'fragments (for example, primer or amplicon '
                         'sequences). If not set, default sequence addition '
-                        'is used.'},
+                        'is used.',
+        'keeplength': 'If selected, the alignment length will be unchanged. '
+                      'Any added sequence that would otherwise introduce new '
+                      'insertions into the alignment, will have those '
+                      'insertions deleted, to preserve original alignment '
+                      'length.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},
