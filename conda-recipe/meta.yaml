@@ -18,6 +18,7 @@ requirements:
   - q2-types {{ qiime2_epoch }}.*
   - mafft {{ mafft }}
   build:
+  - python {{ python }}
   - setuptools
   - versioningit
 test:
