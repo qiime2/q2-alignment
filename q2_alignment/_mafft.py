@@ -146,6 +146,7 @@ def mafft(sequences: DNAFASTAFormat,
     sequences_fp = str(sequences)
     return _mafft(sequences_fp, None, n_threads, parttree, False, False, large)
 
+
 def mafft_add(alignment: AlignedDNAFASTAFormat,
               sequences: DNAFASTAFormat,
               n_threads: int = 1,
