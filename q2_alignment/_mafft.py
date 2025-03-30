@@ -6,14 +6,16 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import os
 import subprocess
 
 import skbio
 import skbio.io
 from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
+from qiime2.core.cache import get_cache
 
 
-def run_command(cmd, output_fp, verbose=True):
+def run_command(cmd, output_fp, verbose=True, env=None):
     if verbose:
         print("Running external command line application. This may print "
               "messages to stdout and/or stderr.")
@@ -23,11 +25,11 @@ def run_command(cmd, output_fp, verbose=True):
         print("\nCommand:", end=' ')
         print(" ".join(cmd), end='\n\n')
     with open(output_fp, 'w') as output_f:
-        subprocess.run(cmd, stdout=output_f, check=True)
+        subprocess.run(cmd, stdout=output_f, check=True, env=env)
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength):
+           keeplength, large):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -77,6 +79,8 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
             "The number of sequences in your feature table is larger than "
             "1 million, please use the parttree parameter")
 
+    env = None
+
     # mafft's signal for utilizing all cores is -1. We want to our users
     # to enter auto for using all cores. This is to prevent any confusion and
     # to keep the UX consisent.
@@ -95,6 +99,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     if keeplength:
         cmd += ['--keeplength']
 
+    if large and addfragments:
+        raise ValueError('--p-addfragments and --p-large cannot be used '
+                         'together.')
+    elif large:
+        env = os.environ.copy()
+        env.pop('MAFFT_TMPDIR', 0)
+        env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
+        cmd += ['--large']
+
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
         cmd += [add_flag, sequences_fp, alignment_fp]
@@ -102,7 +115,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     else:
         cmd += [sequences_fp]
 
-    run_command(cmd, result_fp)
+    run_command(cmd, result_fp, env=env)
 
     # Read output alignment into memory, reassign original sequence IDs, and
     # write alignment back to disk.
@@ -128,19 +141,20 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
 
 def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
-          parttree: bool = False) -> AlignedDNAFASTAFormat:
+          parttree: bool = False,
+          large: bool = False) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
-    return _mafft(sequences_fp, None, n_threads, parttree, False, False)
-
+    return _mafft(sequences_fp, None, n_threads, parttree, False, False, large)
 
 def mafft_add(alignment: AlignedDNAFASTAFormat,
               sequences: DNAFASTAFormat,
               n_threads: int = 1,
               parttree: bool = False,
               addfragments: bool = False,
-              keeplength: bool = False) -> AlignedDNAFASTAFormat:
+              keeplength: bool = False,
+              large: bool = False) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength)
+        keeplength, large)
