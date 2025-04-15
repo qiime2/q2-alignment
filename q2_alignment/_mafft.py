@@ -12,7 +12,7 @@ import subprocess
 import skbio
 import skbio.io
 from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
-from qiime2.core.cache import get_cache
+from qiime2 import get_cache
 
 
 def run_command(cmd, output_fp, verbose=True, env=None):
