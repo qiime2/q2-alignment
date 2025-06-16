@@ -104,7 +104,6 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
                          'together.')
     elif large:
         env = os.environ.copy()
-        env.pop('MAFFT_TMPDIR', 0)
         env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
         cmd += ['--large']
 
