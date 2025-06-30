@@ -27,14 +27,20 @@ plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
     parameters={'n_threads': Threads,
-                'parttree': Bool},
+                'parttree': Bool,
+                'large': Bool},
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
         'n_threads': 'The number of threads. (Use `auto` to automatically use '
                      'all available cores)',
         'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default'},
+                    'aligned are larger than 1000000. Disabled by default',
+        'large': 'This flag is required when aligning very large datasets '
+                 'that do not otherwise fit into memory. Temporary data is '
+                 'then stored in files, instead of RAM. The --use-cache '
+                 'flag specifies the storage location of the temporary files '
+                 'created. By default, $TMP/qiime2/ is used.'},
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT."),
@@ -48,7 +54,8 @@ plugin.methods.register_function(
     parameters={'n_threads': Threads,
                 'parttree': Bool,
                 'addfragments': Bool,
-                'keeplength': Bool},
+                'keeplength': Bool,
+                'large': Bool},
     outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
@@ -66,7 +73,12 @@ plugin.methods.register_function(
                       'Any added sequence that would otherwise introduce new '
                       'insertions into the alignment, will have those '
                       'insertions deleted, to preserve original alignment '
-                      'length.'},
+                      'length.',
+        'large': 'This flag is required when aligning very large datasets '
+                 'that do not otherwise fit into memory. Temporary data is '
+                 'then stored in files, instead of RAM. The --use-cache '
+                 'flag specifies the storage location of the temporary files '
+                 'created. By default, $TMP/qiime2/ is used.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},

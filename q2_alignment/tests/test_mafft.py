@@ -82,6 +82,15 @@ class MafftTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
+    def test_mafft_large(self):
+        input_sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft(input_sequences, large=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
 
 class MafftAddTests(TestPluginBase):
     package = 'q2_alignment.tests'
@@ -181,6 +190,33 @@ class MafftAddTests(TestPluginBase):
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
 
+    def test_mafft_add_no_keeplength_large(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences, keeplength=False,
+                               large=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_keeplength_large(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(alignment, sequences, keeplength=True,
+                               large=True)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.DNA)
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_fragments_large(self):
+        alignment, sequences, exp = self._prepare_sequence_data()
+
+        with self.assertRaisesRegex(ValueError, '--p-addfragments and.*er.'):
+            with redirected_stdio(stderr=os.devnull):
+                mafft_add(alignment, sequences, addfragments=True, large=True)
+
     def test_mafft_add_flags(self):
         alignment, sequences, exp = self._prepare_sequence_data()
 
@@ -190,12 +226,12 @@ class MafftAddTests(TestPluginBase):
                 _ = mafft_add(alignment, sequences)
                 patched_run_cmd.assert_called_with(
                     ["mafft", "--preservecase", "--inputorder", "--thread",
-                     "1", "--add", ANY, ANY], ANY)
+                     "1", "--add", ANY, ANY], ANY, env=None)
 
                 _ = mafft_add(alignment, sequences, addfragments=True)
                 patched_run_cmd.assert_called_with(
                     ["mafft", "--preservecase", "--inputorder", "--thread",
-                     "1", "--addfragments", ANY, ANY], ANY)
+                     "1", "--addfragments", ANY, ANY], ANY, env=None)
 
     def test_duplicate_input_ids_in_unaligned(self):
         input_fp = self.get_data_path('unaligned-duplicate-ids.fasta')
