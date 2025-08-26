@@ -7,10 +7,11 @@
 # ----------------------------------------------------------------------------
 
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads)
+    Plugin, Float, Int, Bool, Range, Citations, Threads)
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
+from q2_alignment._msa_visualizer._visualizer import msa_visualizer
 
 citations = Citations.load('citations.bib', package='q2_alignment')
 plugin = Plugin(
@@ -117,4 +118,33 @@ plugin.methods.register_function(
                  "columns from an alignment. Default min_conservation was "
                  "chosen to reproduce the mask presented in Lane (1991)."),
     citations=[citations['lane1991']]
+)
+
+plugin.visualizers.register_function(
+    function=msa_visualizer,
+    inputs={"alignment": FeatureData[AlignedSequence]},
+    parameters={
+        "wrap_length": Int,
+        "show_count": Bool,
+        "show_consensus": Bool,
+        "dpi": Int,
+    },
+    parameter_descriptions={
+        "wrap_length": (
+            "The column number at which the sequence will be "
+            "wrapped. The remainder of the sequence will continue "
+            "onto the next line."
+        ),
+        "show_count": (
+            "If True, show the ungapped sequence character count "
+            "to the right of the sequence."
+        ),
+        "show_consensus": ("If True, show the consensus sequence below the sequence."),
+        "dpi": ("Set the figure's output resolution to the provided number."),
+    },
+    name="Visualize multiple sequence alignment using pyMSAviz.",
+    description=(
+        "Create a visualization of a multiple sequence alignment using pyMSAviz."
+    ),
+    citations=[citations["shimoyama2022pymsaviz"]],
 )

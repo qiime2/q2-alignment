@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Include DataTables CSS and JS -->
+<link rel="stylesheet" type="text/css" href="./dataTables.min.css">
+<script type="text/javascript" src="./dataTables.min.js"></script>
+
+<title>Multiple Sequence Alignment Visualization</title>
+
+<div class="container">
+
+    <h1 class="my-4">Multiple Sequence Alignment Visualization</h1>
+
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h3>MSA Statistics</h3>
+
+            {{ msa_stats | safe }}
+        </div>
+    </div>
+
+    <script>
+        let msa_stats_table = new DataTable('#msa_stats', {
+            paging: false,
+            searching: false,
+            ordering: false,
+            info: false,
+        });
+    </script>
+
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h3>Per-sequence Statistics and Actions</h3>
+
+            <p>Click the <button disabled>BLAST</button> button to search
+                the <a href="https://www.ncbi.nlm.nih.gov/nucleotide/" target="_blank">NCBI nucleotide database (nt)</a>
+                using a
+                nucleotide query for the chosen sequence. Click the
+                <button disabled>FASTA</button> button to download the ungapped
+                sequence in FASTA format. The FASTA file is saved using
+                the <code>.fa</code> file extension and the sequence is
+                written to a single line (non-interleaved).
+            </p>
+
+            <div class="table-responsive">
+                {{ sequence_stats | safe }}
+            </div>
+
+            <script>
+                let sequence_stats_table = new DataTable('#per-sequence_stats', {
+                    scrollY: 400,
+                });
+            </script>
+
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h3>Figure</h3>
+
+            <p>This plot was generated
+                using <a href="https://github.com/moshi4/pyMSAviz" target="_blank">pyMSAviz</a> v{{ pymsaviz_version }}
+                using a
+                resolution of {{ dpi }} DPI. Sequences were wrapped at position
+                {{ wrap_length }}.</p>
+
+            <h4>Download as:</h4>
+            <div class="btn-group mb-4" role="group">
+                <a href="{{ png_file }}" class="btn btn-primary" download="{{
+                png_file }}">PNG</a>
+                <a href="{{ jpg_file }}" class="btn btn-primary" download="{{
+                jpg_file }}">JPEG</a>
+                <a href="{{ svg_file }}" class="btn btn-primary" download="{{
+                svg_file }}">SVG</a>
+                <a href="{{ pdf_file }}" class="btn btn-primary" download="{{
+                pdf_file }}">PDF</a>
+            </div>
+
+            <hr>
+
+            <div class="mt-4">
+                <img src="{{ png_file }}" class="img-fluid img-thumbnail" alt="MSA visualization">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
