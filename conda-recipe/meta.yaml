@@ -17,6 +17,8 @@ requirements:
   - qiime2 >={{ qiime2 }}
   - q2-types >={{ q2_types }}
   - mafft {{ mafft }}
+  - q2templates >={{ q2templates }}
+  - pymsaviz
   build:
   - python {{ python }}
   - setuptools
@@ -25,6 +27,7 @@ test:
   requires:
   - qiime2 >={{ qiime2 }}
   - q2-types >={{ q2_types }}
+  - q2templates >={{ q2templates }}
   - pytest
   imports:
   - q2_alignment

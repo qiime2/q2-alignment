@@ -139,12 +139,15 @@ plugin.visualizers.register_function(
             "If True, show the ungapped sequence character count "
             "to the right of the sequence."
         ),
-        "show_consensus": ("If True, show the consensus sequence below the sequence."),
+        "show_consensus": (
+            "If True, show the consensus sequence below the sequence."
+        ),
         "dpi": ("Set the figure's output resolution to the provided number."),
     },
     name="Visualize multiple sequence alignment using pyMSAviz.",
     description=(
-        "Create a visualization of a multiple sequence alignment using pyMSAviz."
+        "Create a visualization of a multiple sequence alignment using "
+        "pyMSAviz."
     ),
     citations=[citations["shimoyama2022pymsaviz"]],
 )

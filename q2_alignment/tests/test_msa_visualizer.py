@@ -34,7 +34,7 @@ class MSAVisualizerTests(TestPluginBase):
 
             self.assertIn("2", observed)  # expected number of sequences
             self.assertIn("7", observed)  # expected alignment length
-            self.assertIn("0.845", observed)  # expected GC content
+            self.assertIn("1/14(7.14%)", observed)  # expected GC content
 
             # Expected BLAST Urls
             self.assertIn("QUERY=AGGGGG", observed)

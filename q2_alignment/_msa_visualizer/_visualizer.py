@@ -1,7 +1,7 @@
-import importlib
 import os.path
 import shutil
 import urllib.parse
+from importlib.resources import files
 
 import numpy as np
 import q2templates
@@ -9,7 +9,7 @@ from pymsaviz import MsaViz, __version__
 from q2_types.feature_data import AlignedDNAFASTAFormat
 from skbio import DNA, TabularMSA
 
-TEMPLATES = importlib.resources.files("q2_alignment") / "_msa_visualizer" / "assets"
+TEMPLATES = files("q2_alignment") / "_msa_visualizer" / "assets"
 
 
 def _msa_stats(
@@ -75,12 +75,13 @@ def _gaps(ungapped_len: int, alignment_len: int):
 
     Args:
         ungapped_len: Ungapped-length of a sequence.
-        alignment_len: The total length of a multiple sequence alignment or alignment.
+        alignment_len: The total length of a multiple sequence alignment or
+          alignment.
 
     Returns:
-        A string that shows the ungapped-length, the total alignment length, and the
-        percentage of gaps in the format <gaps>/<total_len>(<percentage>%). For
-        example:
+        A string that shows the ungapped-length, the total alignment length,
+        and the percentage of gaps in the format
+        <gaps>/<total_len>(<percentage>%). For example:
 
         3/48(6%)
     """
@@ -90,16 +91,17 @@ def _gaps(ungapped_len: int, alignment_len: int):
 
 
 def _per_sequence_stats(output_dir: str, msa: TabularMSA) -> str:
-    """Generate a table of basic sequence statistics, BLAST URLs, and downloadable
-    FASTA sequences for each sequences in the provided multiple sequence alignment in
-    HTML.
+    """Generate a table of basic sequence statistics, BLAST URLs, and
+    downloadable FASTA sequences for each sequences in the provided multiple
+    sequence alignment in HTML.
 
-    The BLAST URL that is constructed searches NCBI's nt database using a nucleotide
-    query. One side effect of this function is that a FASTA file is written for each
-    sequence contained within the provided MSA.
+    The BLAST URL that is constructed searches NCBI's nt database using a
+    nucleotide query. One side effect of this function is that a FASTA file
+    is written for each sequence contained within the provided MSA.
 
     Args:
-      output_dir: Path to the directory to which the FASTA files will be written.
+      output_dir: Path to the directory to which the FASTA files will be
+        written.
       msa: A TabularMSA object.
 
     Returns:
@@ -129,7 +131,9 @@ def _per_sequence_stats(output_dir: str, msa: TabularMSA) -> str:
         encoded_seq = urllib.parse.quote(str(ungapped_seq))
 
         # Construct BLAST URL
-        url = f"https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Put&PROGRAM=blastn&DATABASE=nt&QUERY={encoded_seq}"
+        base_url = "https://blast.ncbi.nlm.nih.gov/Blast.cgi"
+        params_url = "?CMD=Put&PROGRAM=blastn&DATABASE=nt&QUERY="
+        url = f"{base_url}{params_url}{encoded_seq}"
 
         # Write sequence to the FASTA file format
         fasta_basename = f"{seq_id}.fa"
@@ -143,7 +147,8 @@ def _per_sequence_stats(output_dir: str, msa: TabularMSA) -> str:
             f"<td>{gc_content}</td>"
             f"<td><a href='{url}' target='_blank' class='btn btn-primary'>"
             f"BLAST</a></td>"
-            f"<td><a href='{fasta_basename}' target='_blank' class='btn btn-primary' "
+            f"<td><a href='{fasta_basename}' target='_blank' "
+            f"class='btn btn-primary' "
             f"download='{fasta_basename}'>FASTA</a></td></tr>"
         )
 
@@ -161,18 +166,20 @@ def msa_visualizer(
     dpi: int = 300,
 ) -> None:
     if alignment is None:
-        raise ValueError("Cannot visualize an empty multiple sequence alignment.")
+        raise ValueError(
+            "Cannot visualize an empty multiple sequence alignment."
+        )
 
     alignment_fp = str(alignment)
 
-    # Read MSA into a TabularMSA object; used for statistics and generating BLAST links
     msa = TabularMSA.read(alignment_fp, constructor=DNA)
 
-    # Generate overall statistics for the multiple sequence alignment and format into
-    # an HTML string
+    # Generate overall statistics for the multiple sequence alignment and
+    # format into an HTML string
     msa_stats = _msa_stats(msa)
 
-    # Generate a set of BLAST links for each sequence and format into an HTML string
+    # Generate a set of BLAST links for each sequence and format into an HTML
+    # string
     sequence_stats = _per_sequence_stats(output_dir=output_dir, msa=msa)
 
     # Visualize multiple sequence alignment
@@ -214,11 +221,12 @@ def msa_visualizer(
         },
     )
 
-    # Copy JavaScript and CSS files, required by DataTables, to the output directory
-    js = os.path.join(TEMPLATES, 'js/dataTables.min.js')
-    os.mkdir(os.path.join(output_dir, 'js'))
-    shutil.copy(js, os.path.join(output_dir, 'dataTables.min.js'))
+    # Copy JavaScript and CSS files, required by DataTables, to the output
+    # directory
+    js = os.path.join(TEMPLATES, "js/dataTables.min.js")
+    os.mkdir(os.path.join(output_dir, "js"))
+    shutil.copy(js, os.path.join(output_dir, "dataTables.min.js"))
 
-    css = os.path.join(TEMPLATES, 'css/dataTables.min.css')
-    os.mkdir(os.path.join(output_dir, 'css'))
-    shutil.copy(css, os.path.join(output_dir, 'dataTables.min.css'))
+    css = os.path.join(TEMPLATES, "css/dataTables.min.css")
+    os.mkdir(os.path.join(output_dir, "css"))
+    shutil.copy(css, os.path.join(output_dir, "dataTables.min.css"))
