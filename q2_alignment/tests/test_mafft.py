@@ -82,6 +82,21 @@ class MafftTests(TestPluginBase):
             with redirected_stdio(stderr=os.devnull):
                 mafft(input_sequences)
 
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_parttree_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, parttree=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--parttree", ANY],
+            ANY,
+            env=None
+        )
+
     def test_mafft_large(self):
         input_sequences, exp = self._prepare_sequence_data()
 
@@ -90,6 +105,139 @@ class MafftTests(TestPluginBase):
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
         self.assertEqual(obs, exp)
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_globalpair_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, globalpair=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--globalpair", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_localpair_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, localpair=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--localpair", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_genafpair_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, genafpair=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--genafpair", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_maxiterate_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, maxiterate=1000)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--maxiterate", "1000", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_maxiterate_not_included_when_default(
+            self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, maxiterate=0)
+
+        call_args, _ = mock_run_cmd.call_args
+        cmd = call_args[0]
+
+        self.assertNotIn("--maxiterate", cmd)
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_retree_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, retree=3)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--retree", "3", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_retree_not_included_when_default(
+            self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, retree=2)
+
+        call_args, _ = mock_run_cmd.call_args
+        cmd = call_args[0]
+
+        self.assertNotIn("--retree", cmd)
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_nofft_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, nofft=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--nofft", ANY],
+            ANY,
+            env=None
+        )
+
+    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
+    @patch('q2_alignment._mafft.run_command')
+    def test_mafft_auto_flag(self, mock_run_cmd, mock_read):
+        input_sequences, exp = self._prepare_sequence_data()
+        mock_read.return_value = exp
+
+        mafft(input_sequences, auto=True)
+
+        mock_run_cmd.assert_called_with(
+            ["mafft", "--preservecase", "--inputorder",
+             "--thread", "1", "--auto", ANY],
+            ANY,
+            env=None
+        )
 
 
 class MafftAddTests(TestPluginBase):

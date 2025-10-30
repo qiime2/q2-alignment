@@ -29,7 +29,8 @@ def run_command(cmd, output_fp, verbose=True, env=None):
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength, large):
+           keeplength, large, globalpair, localpair, genafpair, maxiterate,
+           retree, nofft, auto):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -107,6 +108,31 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
         cmd += ['--large']
 
+    if globalpair:
+        cmd += ['--globalpair']
+
+    if localpair:
+        cmd += ['--localpair']
+
+    if genafpair:
+        cmd += ['--genafpair']
+
+    # --maxiterate is set to 0 by default, so we only pass this argument onto
+    # MAFFT if it deviates from this value.
+    if maxiterate not in (None, 0):
+        cmd += ['--maxiterate', str(maxiterate)]
+
+    # --retree is set to 2 by default, so we only pass this argument onto
+    # MAFFT if it deviates from this value.
+    if retree not in (None, 2):
+        cmd += ['--retree', str(retree)]
+
+    if nofft:
+        cmd += ['--nofft']
+
+    if auto:
+        cmd += ['--auto']
+
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
         cmd += [add_flag, sequences_fp, alignment_fp]
@@ -141,9 +167,19 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
 def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False,
-          large: bool = False) -> AlignedDNAFASTAFormat:
+          large: bool = False,
+          globalpair: bool = False,
+          localpair: bool = False,
+          genafpair: bool = False,
+          maxiterate: int = 0,
+          retree: int = 2,
+          nofft: bool = False,
+          auto: bool = False) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
-    return _mafft(sequences_fp, None, n_threads, parttree, False, False, large)
+    return _mafft(
+        sequences_fp, None, n_threads, parttree, False, False, large,
+        globalpair, localpair, genafpair, maxiterate, retree, nofft, auto
+    )
 
 
 def mafft_add(alignment: AlignedDNAFASTAFormat,
@@ -152,9 +188,18 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               parttree: bool = False,
               addfragments: bool = False,
               keeplength: bool = False,
-              large: bool = False) -> AlignedDNAFASTAFormat:
+              large: bool = False,
+              globalpair: bool = False,
+              localpair: bool = False,
+              genafpair: bool = False,
+              maxiterate: int = 0,
+              retree: int = 2,
+              nofft: bool = False,
+              auto: bool = False) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large)
+        keeplength, large, globalpair, localpair, genafpair, maxiterate,
+        retree, nofft, auto
+    )
