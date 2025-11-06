@@ -6,11 +6,38 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+from q2_types.feature_data import (
+    AlignedProteinSequence,
+    AlignedSequence,
+    FeatureData,
+    ProteinSequence,
+    Sequence,
+)
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads)
-from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
+    Bool,
+    Citations,
+    Float,
+    Plugin,
+    Range,
+    Threads,
+    TypeMap,
+    TypeMatch
+)
 
+import importlib
 import q2_alignment
+
+T_GenericSequenceInput, T_GenericAlignedSequenceOutput = TypeMap({
+    FeatureData[Sequence]:
+        FeatureData[AlignedSequence],
+    FeatureData[ProteinSequence]:
+        FeatureData[AlignedProteinSequence],
+})
+
+T_MatchAlignedSequenceType = TypeMatch([
+    FeatureData[AlignedSequence],
+    FeatureData[AlignedProteinSequence],
+])
 
 citations = Citations.load('citations.bib', package='q2_alignment')
 plugin = Plugin(
@@ -25,11 +52,11 @@ plugin = Plugin(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft,
-    inputs={'sequences': FeatureData[Sequence]},
+    inputs={'sequences': T_GenericSequenceInput},
     parameters={'n_threads': Threads,
                 'parttree': Bool,
                 'large': Bool},
-    outputs=[('alignment', FeatureData[AlignedSequence])],
+    outputs=[('alignment', T_GenericAlignedSequenceOutput)],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
         'n_threads': 'The number of threads. (Use `auto` to automatically use '
@@ -49,14 +76,17 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft_add,
-    inputs={'alignment': FeatureData[AlignedSequence],
-            'sequences': FeatureData[Sequence]},
+    inputs={'alignment': (
+            FeatureData[AlignedSequence] |
+            FeatureData[AlignedProteinSequence]
+            ),
+            'sequences': T_GenericSequenceInput},
     parameters={'n_threads': Threads,
                 'parttree': Bool,
                 'addfragments': Bool,
                 'keeplength': Bool,
                 'large': Bool},
-    outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
+    outputs=[('expanded_alignment', T_GenericAlignedSequenceOutput)],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
                         'sequences': 'The sequences to be added.'},
@@ -89,10 +119,10 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mask,
-    inputs={'alignment': FeatureData[AlignedSequence]},
+    inputs={'alignment': T_MatchAlignedSequenceType},
     parameters={'max_gap_frequency': Float % Range(0, 1, inclusive_end=True),
                 'min_conservation': Float % Range(0, 1, inclusive_end=True)},
-    outputs=[('masked_alignment', FeatureData[AlignedSequence])],
+    outputs=[('masked_alignment', T_MatchAlignedSequenceType)],
     input_descriptions={'alignment': 'The alignment to be masked.'},
     parameter_descriptions={
         'max_gap_frequency': ('The maximum relative frequency of gap '
@@ -118,3 +148,5 @@ plugin.methods.register_function(
                  "chosen to reproduce the mask presented in Lane (1991)."),
     citations=[citations['lane1991']]
 )
+
+importlib.import_module("q2_alignment.types._transformer")
