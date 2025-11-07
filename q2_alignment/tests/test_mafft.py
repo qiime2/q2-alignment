@@ -339,7 +339,7 @@ class MafftAddTests(TestPluginBase):
         assert args[-1] == SequenceType.NUCLEOTIDE
 
     @patch("q2_alignment._mafft._mafft")
-    def test_mafft__add_sets_protein_sequence_type(self, mock_mafft):
+    def test_mafft_add_sets_protein_sequence_type(self, mock_mafft):
         alignment = AlignedProteinFASTAFormat()
         seqs = ProteinFASTAFormat()
         mafft_add(alignment, seqs)
