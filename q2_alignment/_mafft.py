@@ -72,8 +72,6 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     unaligned_seq_ids = {}
 
     constructor = skbio.DNA if sequence_type.is_nucleotide() else skbio.Protein
-    print(constructor)
-    print(type(constructor))
 
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
