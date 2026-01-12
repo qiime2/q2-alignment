@@ -15,6 +15,34 @@ from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
 from qiime2 import get_cache
 
 
+def _validate_alignment_strategy(strategy: str | None) -> str:
+    valid_strategies = [
+        "auto", "fftns", "nofft", "globalpair", "localpair", "genafpair",
+    ]
+    valid_strategies_str = ", ".join(
+        [s for s in valid_strategies])
+
+    if strategy == "auto":
+        return ["--auto"]
+    if strategy == "fftns":
+        return []
+    if strategy == "nofft":
+        return ["--nofft"]
+    if strategy == "localpair":
+        return ["--localpair"]
+    if strategy == "globalpair":
+        return ["--globalpair"]
+    if strategy == "genafpair":
+        return ["--genafpair"]
+    if strategy is None:
+        return []
+    else:
+        raise ValueError(
+            f"Invalid alignment strategy '{strategy}'. "
+            f"Valid values are: {valid_strategies_str}."
+        )
+
+
 def run_command(cmd, output_fp, verbose=True, env=None):
     if verbose:
         print("Running external command line application. This may print "
@@ -29,8 +57,7 @@ def run_command(cmd, output_fp, verbose=True, env=None):
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength, large, globalpair, localpair, genafpair, maxiterate,
-           retree, nofft, auto):
+           keeplength, large, strategy, maxiterate, retree):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -108,14 +135,9 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
         cmd += ['--large']
 
-    if globalpair:
-        cmd += ['--globalpair']
-
-    if localpair:
-        cmd += ['--localpair']
-
-    if genafpair:
-        cmd += ['--genafpair']
+    if strategy:
+        strategy_flag = _validate_alignment_strategy(strategy)
+        cmd += strategy_flag
 
     # --maxiterate is set to 0 by default, so we only pass this argument onto
     # MAFFT if it deviates from this value.
@@ -126,12 +148,6 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     # MAFFT if it deviates from this value.
     if retree not in (None, 2):
         cmd += ['--retree', str(retree)]
-
-    if nofft:
-        cmd += ['--nofft']
-
-    if auto:
-        cmd += ['--auto']
 
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
@@ -168,17 +184,13 @@ def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False,
           large: bool = False,
-          globalpair: bool = False,
-          localpair: bool = False,
-          genafpair: bool = False,
+          strategy: str = "fftns",
           maxiterate: int = 0,
-          retree: int = 2,
-          nofft: bool = False,
-          auto: bool = False) -> AlignedDNAFASTAFormat:
+          retree: int = 2,) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, None, n_threads, parttree, False, False, large,
-        globalpair, localpair, genafpair, maxiterate, retree, nofft, auto
+        strategy, maxiterate, retree
     )
 
 
@@ -189,17 +201,12 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               addfragments: bool = False,
               keeplength: bool = False,
               large: bool = False,
-              globalpair: bool = False,
-              localpair: bool = False,
-              genafpair: bool = False,
+              strategy: str = "fftns",
               maxiterate: int = 0,
-              retree: int = 2,
-              nofft: bool = False,
-              auto: bool = False) -> AlignedDNAFASTAFormat:
+              retree: int = 2,) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large, globalpair, localpair, genafpair, maxiterate,
-        retree, nofft, auto
+        keeplength, large, strategy, maxiterate, retree
     )

@@ -7,10 +7,42 @@
 # ----------------------------------------------------------------------------
 
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads, Int)
+    Plugin, Float, Bool, Range, Citations, Threads, Int, Str)
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
+
+mafft_params = {
+    "n_threads": Threads,
+    "parttree": Bool,
+    "large": Bool,
+    "strategy": Str,
+    "maxiterate": Int,
+    "retree": Int,
+}
+mafft_param_descriptions = {
+    "n_threads": "The number of threads. (Use `auto` to automatically use "
+                 "all available cores)",
+    "parttree": "This flag is required if the number of sequences being "
+                "aligned are larger than 1,000,000. Disabled by default.",
+    "large": "This flag is required when aligning very large datasets "
+             "that do not otherwise fit into memory. Temporary data is "
+             "then stored in files, instead of RAM. The --use-cache "
+             "flag specifies the storage location of the temporary files "
+             "created. By default, $TMP/qiime2/ is used.",
+    "strategy": "Specifies the multiple alignment strategy to use. "
+                "Exactly one strategy may be specified. Valid options "
+                "are: 'auto', 'fftns', 'nofft', 'globalpair', "
+                "'localpair', and 'genafpair'. Default strategy: 'fftns'.",
+    'maxiterate': 'Specifies how many iterative refinement cycles are '
+                  'performed after the initial progressive alignment. '
+                  'By default, no iterative refinement is performed.',
+    'retree': 'Specifies the number of times the guide tree is rebuilt '
+              'during the progressive stage. Typically, tree topology '
+              'stabilizes after 2-3 iterations and higher values rarely '
+              'improves alignment quality enough to justify the extra '
+              'computation.',
+}
 
 citations = Citations.load('citations.bib', package='q2_alignment')
 plugin = Plugin(
@@ -26,55 +58,14 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Threads,
-                'parttree': Bool,
-                'large': Bool,
-                'globalpair': Bool,
-                'localpair': Bool,
-                'genafpair': Bool,
-                'maxiterate': Int,
-                'retree': Int,
-                'nofft': Bool,
-                'auto': Bool},
+    parameters={
+        **mafft_params,
+    },
     outputs=[('alignment', FeatureData[AlignedSequence])],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
-        'n_threads': 'The number of threads. (Use `auto` to automatically use '
-                     'all available cores)',
-        'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default.',
-        'large': 'This flag is required when aligning very large datasets '
-                 'that do not otherwise fit into memory. Temporary data is '
-                 'then stored in files, instead of RAM. The --use-cache '
-                 'flag specifies the storage location of the temporary files '
-                 'created. By default, $TMP/qiime2/ is used.',
-        'globalpair': 'Compute all pairwise alignments using the '
-                      'Needleman-Wunsch algorithm. Suitable for up to ~200 '
-                      'sequences. A combination with --p-maxiterate 1000 '
-                      'is recommended (G-INS-i).',
-        'localpair': 'Compute all pairwise alignments using the '
-                     'Smith-Waterman algorithm. Suitable for up to ~200 '
-                     'sequences. A combination with --p-maxiterate 1000 '
-                     'is recommended (L-INS-i).',
-        'genafpair': 'Compute all pairwise alignments with a local algorithm '
-                     'with the generalized affine gap cost. Suitable for up '
-                     'to ~200 sequences. A combination with --p-maxiterate '
-                     '1000 is recommended (E-INS-i).',
-        'maxiterate': 'Specifies how many iterative refinement cycles are '
-                      'performed after the initial progressive alignment. '
-                      'By default, no iterative refinement is performed.',
-        'retree': 'Specifies the number of times the guide tree is rebuilt '
-                  'during the progressive stage. Typically, tree topology '
-                  'stabilizes after 2-3 iterations and higher values rarely '
-                  'improves alignment quality enough to justify the extra '
-                  'computation.',
-        'nofft': 'Disables Fast Fourier Transform (FFT) approximation in '
-                 'group-to-group alignment. In general, the FFT algorithm is '
-                 'less efficient for distantly related (i.e., less '
-                 'conserved) sequences.',
-        'auto': 'Automatically select the best alignment strategy '
-                '(from FFT-NS-1, FFT-NS-2, FFT-NS-i, or L-INS-i) based on '
-                'the input\'s data size.'},
+        **mafft_param_descriptions,
+    },
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT."),
@@ -85,27 +76,17 @@ plugin.methods.register_function(
     function=q2_alignment.mafft_add,
     inputs={'alignment': FeatureData[AlignedSequence],
             'sequences': FeatureData[Sequence]},
-    parameters={'n_threads': Threads,
-                'parttree': Bool,
-                'addfragments': Bool,
-                'keeplength': Bool,
-                'large': Bool,
-                'globalpair': Bool,
-                'localpair': Bool,
-                'genafpair': Bool,
-                'maxiterate': Int,
-                'retree': Int,
-                'nofft': Bool,
-                'auto': Bool},
+    parameters={
+        **mafft_params,
+        'addfragments': Bool,
+        'keeplength': Bool,
+    },
     outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
                         'sequences': 'The sequences to be added.'},
     parameter_descriptions={
-        'n_threads': 'The number of threads. (Use `auto` to automatically use '
-                     'all available cores)',
-        'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default.',
+        **mafft_param_descriptions,
         'addfragments': 'Optimize for the addition of short sequence '
                         'fragments (for example, primer or amplicon '
                         'sequences). If not set, default sequence addition '
@@ -114,39 +95,7 @@ plugin.methods.register_function(
                       'Any added sequence that would otherwise introduce new '
                       'insertions into the alignment, will have those '
                       'insertions deleted, to preserve original alignment '
-                      'length.',
-        'large': 'This flag is required when aligning very large datasets '
-                 'that do not otherwise fit into memory. Temporary data is '
-                 'then stored in files, instead of RAM. The --use-cache '
-                 'flag specifies the storage location of the temporary files '
-                 'created. By default, $TMP/qiime2/ is used.',
-        'globalpair': 'Compute all pairwise alignments using the '
-                      'Needleman-Wunsch algorithm. Suitable for up to ~200 '
-                      'sequences. A combination with --p-maxiterate 1000 '
-                      'is recommended (G-INS-i).',
-        'localpair': 'Compute all pairwise alignments using the Smith-Waterman'
-                     'algorithm. Suitable for up to ~200 sequences. A '
-                     'combination with --p-maxiterate 1000 is recommended '
-                     '(L-INS-i).',
-        'genafpair': 'Compute all pairwise alignments with a local algorithm '
-                     'with the generalized affine gap cost. Suitable for up '
-                     'to ~200 sequences. A combination with --p-maxiterate '
-                     '1000 is recommended (E-INS-i).',
-        'maxiterate': 'Specifies how many iterative refinement cycles are '
-                      'performed after the initial progressive alignment. '
-                      'By default, no iterative refinement is performed.',
-        'retree': 'Specifies the number of times the guide tree is rebuilt '
-                  'during the progressive stage. Typically, tree topology '
-                  'stabilizes after 2-3 iterations and higher values rarely '
-                  'improves alignment quality enough to justify the extra '
-                  'computation.',
-        'nofft': 'Disables Fast Fourier Transform (FFT) approximation in '
-                 'group-to-group alignment. In general, the FFT algorithm is '
-                 'less efficient for distantly related (i.e., less '
-                 'conserved) sequences.',
-        'auto': 'Automatically select the best alignment strategy '
-                '(from FFT-NS-1, FFT-NS-2, FFT-NS-i, or L-INS-i) based on '
-                'the input\'s data size.'},
+                      'length.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},
