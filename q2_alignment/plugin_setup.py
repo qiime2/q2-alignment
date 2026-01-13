@@ -34,8 +34,8 @@ mafft_param_descriptions = {
              "created. By default, $TMP/qiime2/ is used.",
     "strategy": "Specifies the multiple alignment strategy to use. "
                 "Exactly one strategy may be specified. Valid options "
-                "are: 'auto', 'fftns', 'nofft', 'globalpair', "
-                "'localpair', and 'genafpair'. Default strategy: 'fftns'.",
+                "are: 'auto', 'nofft', 'globalpair', 'localpair', "
+                "and 'genafpair'. Default strategy: FFT-NS.",
     'maxiterate': 'Specifies how many iterative refinement cycles are '
                   'performed after the initial progressive alignment. '
                   'By default, no iterative refinement is performed.',
