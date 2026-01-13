@@ -15,34 +15,6 @@ from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
 from qiime2 import get_cache
 
 
-def _validate_alignment_strategy(strategy: str | None) -> str:
-    valid_strategies = [
-        "auto", "fftns", "nofft", "globalpair", "localpair", "genafpair",
-    ]
-    valid_strategies_str = ", ".join(
-        [s for s in valid_strategies])
-
-    if strategy == "auto":
-        return ["--auto"]
-    if strategy == "fftns":
-        return []
-    if strategy == "nofft":
-        return ["--nofft"]
-    if strategy == "localpair":
-        return ["--localpair"]
-    if strategy == "globalpair":
-        return ["--globalpair"]
-    if strategy == "genafpair":
-        return ["--genafpair"]
-    if strategy is None:
-        return []
-    else:
-        raise ValueError(
-            f"Invalid alignment strategy '{strategy}'. "
-            f"Valid values are: {valid_strategies_str}."
-        )
-
-
 def run_command(cmd, output_fp, verbose=True, env=None):
     if verbose:
         print("Running external command line application. This may print "
@@ -136,8 +108,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         cmd += ['--large']
 
     if strategy:
-        strategy_flag = _validate_alignment_strategy(strategy)
-        cmd += strategy_flag
+        cmd += [("--" + strategy)]
 
     # --maxiterate is set to 0 by default, so we only pass this argument onto
     # MAFFT if it deviates from this value.
@@ -184,7 +155,7 @@ def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False,
           large: bool = False,
-          strategy: str = "fftns",
+          strategy: str | None = None,
           maxiterate: int = 0,
           retree: int = 2,) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
@@ -201,7 +172,7 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               addfragments: bool = False,
               keeplength: bool = False,
               large: bool = False,
-              strategy: str = "fftns",
+              strategy: str | None = None,
               maxiterate: int = 0,
               retree: int = 2,) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)

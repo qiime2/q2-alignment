@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads, Int, Str)
+    Plugin, Float, Bool, Range, Citations, Threads, Int, Str, Choices)
 from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
 import q2_alignment
@@ -16,7 +16,9 @@ mafft_params = {
     "n_threads": Threads,
     "parttree": Bool,
     "large": Bool,
-    "strategy": Str,
+    "strategy": Str % Choices({
+        "auto", "nofft", "globalpair", "localpair", "genafpair",
+    }),
     "maxiterate": Int,
     "retree": Int,
 }
