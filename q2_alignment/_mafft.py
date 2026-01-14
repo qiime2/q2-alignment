@@ -152,8 +152,8 @@ def mafft(sequences: DNAFASTAFormat,
           parttree: bool = False,
           large: bool = False,
           strategy: str | None = None,
-          maxiterate: int = 0,
-          retree: int = 2,) -> AlignedDNAFASTAFormat:
+          maxiterate: int | None = None,
+          retree: int | None = None,) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, None, n_threads, parttree, False, False, large,
@@ -169,8 +169,8 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               keeplength: bool = False,
               large: bool = False,
               strategy: str | None = None,
-              maxiterate: int = 0,
-              retree: int = 2,) -> AlignedDNAFASTAFormat:
+              maxiterate: int | None = None,
+              retree: int | None = None) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(

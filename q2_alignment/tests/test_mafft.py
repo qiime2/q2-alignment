@@ -168,20 +168,6 @@ class MafftTests(TestPluginBase):
 
     @patch('q2_alignment._mafft.skbio.TabularMSA.read')
     @patch('q2_alignment._mafft.run_command')
-    def test_mafft_maxiterate_not_included_when_default(
-            self, mock_run_cmd, mock_read):
-        input_sequences, exp = self._prepare_sequence_data()
-        mock_read.return_value = exp
-
-        mafft(input_sequences, maxiterate=0)
-
-        call_args, _ = mock_run_cmd.call_args
-        cmd = call_args[0]
-
-        self.assertNotIn("--maxiterate", cmd)
-
-    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
-    @patch('q2_alignment._mafft.run_command')
     def test_mafft_retree_flag(self, mock_run_cmd, mock_read):
         input_sequences, exp = self._prepare_sequence_data()
         mock_read.return_value = exp
@@ -194,20 +180,6 @@ class MafftTests(TestPluginBase):
             ANY,
             env=None
         )
-
-    @patch('q2_alignment._mafft.skbio.TabularMSA.read')
-    @patch('q2_alignment._mafft.run_command')
-    def test_mafft_retree_not_included_when_default(
-            self, mock_run_cmd, mock_read):
-        input_sequences, exp = self._prepare_sequence_data()
-        mock_read.return_value = exp
-
-        mafft(input_sequences, retree=2)
-
-        call_args, _ = mock_run_cmd.call_args
-        cmd = call_args[0]
-
-        self.assertNotIn("--retree", cmd)
 
     @patch('q2_alignment._mafft.skbio.TabularMSA.read')
     @patch('q2_alignment._mafft.run_command')
