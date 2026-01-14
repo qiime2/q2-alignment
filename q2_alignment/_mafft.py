@@ -29,7 +29,7 @@ def run_command(cmd, output_fp, verbose=True, env=None):
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength, large):
+           keeplength, large, strategy, maxiterate, retree):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -107,6 +107,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
         cmd += ['--large']
 
+    if strategy:
+        cmd += [("--" + strategy)]
+
+    if maxiterate is not None:
+        cmd += ['--maxiterate', str(maxiterate)]
+
+    if retree is not None:
+        cmd += ['--retree', str(retree)]
+
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
         cmd += [add_flag, sequences_fp, alignment_fp]
@@ -141,9 +150,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
 def mafft(sequences: DNAFASTAFormat,
           n_threads: int = 1,
           parttree: bool = False,
-          large: bool = False) -> AlignedDNAFASTAFormat:
+          large: bool = False,
+          strategy: str | None = None,
+          maxiterate: int | None = None,
+          retree: int | None = None,) -> AlignedDNAFASTAFormat:
     sequences_fp = str(sequences)
-    return _mafft(sequences_fp, None, n_threads, parttree, False, False, large)
+    return _mafft(
+        sequences_fp, None, n_threads, parttree, False, False, large,
+        strategy, maxiterate, retree
+    )
 
 
 def mafft_add(alignment: AlignedDNAFASTAFormat,
@@ -152,9 +167,13 @@ def mafft_add(alignment: AlignedDNAFASTAFormat,
               parttree: bool = False,
               addfragments: bool = False,
               keeplength: bool = False,
-              large: bool = False) -> AlignedDNAFASTAFormat:
+              large: bool = False,
+              strategy: str | None = None,
+              maxiterate: int | None = None,
+              retree: int | None = None) -> AlignedDNAFASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large)
+        keeplength, large, strategy, maxiterate, retree
+    )
