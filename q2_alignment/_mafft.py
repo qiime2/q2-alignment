@@ -110,14 +110,10 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     if strategy:
         cmd += [("--" + strategy)]
 
-    # --maxiterate is set to 0 by default, so we only pass this argument onto
-    # MAFFT if it deviates from this value.
-    if maxiterate not in (None, 0):
+    if maxiterate is not None:
         cmd += ['--maxiterate', str(maxiterate)]
 
-    # --retree is set to 2 by default, so we only pass this argument onto
-    # MAFFT if it deviates from this value.
-    if retree not in (None, 2):
+    if retree is not None:
         cmd += ['--retree', str(retree)]
 
     if alignment_fp is not None:

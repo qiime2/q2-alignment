@@ -19,8 +19,8 @@ mafft_params = {
     "strategy": Str % Choices({
         "auto", "nofft", "globalpair", "localpair", "genafpair",
     }),
-    "maxiterate": Int,
-    "retree": Int,
+    "maxiterate": Int % Range(0, None),
+    "retree": Int % Range(0, None),
 }
 mafft_param_descriptions = {
     "n_threads": "The number of threads. (Use `auto` to automatically use "
