@@ -6,6 +6,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+from importlib import import_module
+
 from q2_types.feature_data import (
     AlignedProteinSequence,
     AlignedSequence,
@@ -14,8 +16,18 @@ from q2_types.feature_data import (
     Sequence,
 )
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads, Int, Str, Choices)
-from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
+    Bool,
+    Choices,
+    Citations,
+    Float,
+    Int,
+    Plugin,
+    Range,
+    Str,
+    Threads,
+    TypeMap,
+    TypeMatch,
+)
 
 import q2_alignment
 
@@ -160,4 +172,4 @@ plugin.methods.register_function(
     citations=[citations['lane1991']]
 )
 
-importlib.import_module("q2_alignment.types._transformer")
+import_module("q2_alignment.types._transformer")

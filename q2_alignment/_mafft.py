@@ -198,9 +198,7 @@ def mafft(sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
 
     return _mafft(
         sequences_fp, None, n_threads, parttree, False, False, large,
-        strategy, maxiterate, retree
-    ,
-                  sequence_type)
+        strategy, maxiterate, retree, sequence_type)
 
 
 def mafft_add(alignment: Union[AlignedDNAFASTAFormat,
@@ -225,5 +223,4 @@ def mafft_add(alignment: Union[AlignedDNAFASTAFormat,
 
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large, strategy, maxiterate, retree
-    , sequence_type)
+        keeplength, large, strategy, maxiterate, retree, sequence_type)
