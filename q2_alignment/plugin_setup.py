@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2016-2025, QIIME 2 development team.
+# Copyright (c) 2016-2026, QIIME 2 development team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -14,18 +14,44 @@ from q2_types.feature_data import (
     Sequence,
 )
 from qiime2.plugin import (
-    Bool,
-    Citations,
-    Float,
-    Plugin,
-    Range,
-    Threads,
-    TypeMap,
-    TypeMatch
-)
+    Plugin, Float, Bool, Range, Citations, Threads, Int, Str, Choices)
+from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
 
-import importlib
 import q2_alignment
+
+mafft_params = {
+    "n_threads": Threads,
+    "parttree": Bool,
+    "large": Bool,
+    "strategy": Str % Choices({
+        "auto", "nofft", "globalpair", "localpair", "genafpair",
+    }),
+    "maxiterate": Int % Range(0, None),
+    "retree": Int % Range(0, None),
+}
+mafft_param_descriptions = {
+    "n_threads": "The number of threads. (Use `auto` to automatically use "
+                 "all available cores)",
+    "parttree": "This flag is required if the number of sequences being "
+                "aligned are larger than 1,000,000. Disabled by default.",
+    "large": "This flag is required when aligning very large datasets "
+             "that do not otherwise fit into memory. Temporary data is "
+             "then stored in files, instead of RAM. The --use-cache "
+             "flag specifies the storage location of the temporary files "
+             "created. By default, $TMP/qiime2/ is used.",
+    "strategy": "Specifies the multiple alignment strategy to use. "
+                "Exactly one strategy may be specified. Valid options "
+                "are: 'auto', 'nofft', 'globalpair', 'localpair', "
+                "and 'genafpair'. Default strategy: FFT-NS.",
+    'maxiterate': 'Specifies how many iterative refinement cycles are '
+                  'performed after the initial progressive alignment. '
+                  'By default, no iterative refinement is performed.',
+    'retree': 'Specifies the number of times the guide tree is rebuilt '
+              'during the progressive stage. Typically, tree topology '
+              'stabilizes after 2-3 iterations and higher values rarely '
+              'improves alignment quality enough to justify the extra '
+              'computation.',
+}
 
 T_GenericSequenceInput, T_GenericAlignedSequenceOutput = TypeMap({
     FeatureData[Sequence]:
@@ -53,21 +79,14 @@ plugin = Plugin(
 plugin.methods.register_function(
     function=q2_alignment.mafft,
     inputs={'sequences': T_GenericSequenceInput},
-    parameters={'n_threads': Threads,
-                'parttree': Bool,
-                'large': Bool},
+    parameters={
+        **mafft_params,
+    },
     outputs=[('alignment', T_GenericAlignedSequenceOutput)],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
-        'n_threads': 'The number of threads. (Use `auto` to automatically use '
-                     'all available cores)',
-        'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default',
-        'large': 'This flag is required when aligning very large datasets '
-                 'that do not otherwise fit into memory. Temporary data is '
-                 'then stored in files, instead of RAM. The --use-cache '
-                 'flag specifies the storage location of the temporary files '
-                 'created. By default, $TMP/qiime2/ is used.'},
+        **mafft_param_descriptions,
+    },
     output_descriptions={'alignment': 'The aligned sequences.'},
     name='De novo multiple sequence alignment with MAFFT',
     description=("Perform de novo multiple sequence alignment using MAFFT."),
@@ -81,20 +100,17 @@ plugin.methods.register_function(
             FeatureData[AlignedProteinSequence]
             ),
             'sequences': T_GenericSequenceInput},
-    parameters={'n_threads': Threads,
-                'parttree': Bool,
-                'addfragments': Bool,
-                'keeplength': Bool,
-                'large': Bool},
+    parameters={
+        **mafft_params,
+        'addfragments': Bool,
+        'keeplength': Bool,
+    },
     outputs=[('expanded_alignment', T_GenericAlignedSequenceOutput)],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
                         'sequences': 'The sequences to be added.'},
     parameter_descriptions={
-        'n_threads': 'The number of threads. (Use `auto` to automatically use '
-                     'all available cores)',
-        'parttree': 'This flag is required if the number of sequences being '
-                    'aligned are larger than 1000000. Disabled by default',
+        **mafft_param_descriptions,
         'addfragments': 'Optimize for the addition of short sequence '
                         'fragments (for example, primer or amplicon '
                         'sequences). If not set, default sequence addition '
@@ -103,12 +119,7 @@ plugin.methods.register_function(
                       'Any added sequence that would otherwise introduce new '
                       'insertions into the alignment, will have those '
                       'insertions deleted, to preserve original alignment '
-                      'length.',
-        'large': 'This flag is required when aligning very large datasets '
-                 'that do not otherwise fit into memory. Temporary data is '
-                 'then stored in files, instead of RAM. The --use-cache '
-                 'flag specifies the storage location of the temporary files '
-                 'created. By default, $TMP/qiime2/ is used.'},
+                      'length.'},
     output_descriptions={
         'expanded_alignment': 'Alignment containing the provided aligned and '
                               'unaligned sequences.'},

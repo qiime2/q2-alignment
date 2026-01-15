@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2016-2025, QIIME 2 development team.
+# Copyright (c) 2016-2026, QIIME 2 development team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -62,7 +62,7 @@ def run_command(cmd, output_fp, verbose=True, env=None):
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength, large, sequence_type):
+           keeplength, large, strategy, maxiterate, retree, sequence_type):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -143,6 +143,15 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         env.update({'MAFFT_TMPDIR': get_cache().get_tmp_path()})
         cmd += ['--large']
 
+    if strategy:
+        cmd += [("--" + strategy)]
+
+    if maxiterate is not None:
+        cmd += ['--maxiterate', str(maxiterate)]
+
+    if retree is not None:
+        cmd += ['--retree', str(retree)]
+
     if alignment_fp is not None:
         add_flag = '--addfragments' if addfragments else '--add'
         cmd += [add_flag, sequences_fp, alignment_fp]
@@ -177,14 +186,20 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
 def mafft(sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
           n_threads: int = 1,
           parttree: bool = False,
-          large: bool = False) -> FASTAFormat:
+          large: bool = False,
+          strategy: str | None = None,
+          maxiterate: int | None = None,
+          retree: int | None = None,) -> FASTAFormat:
     sequence_type = SequenceType.NUCLEOTIDE
     if isinstance(sequences, ProteinFASTAFormat):
         sequence_type = SequenceType.PROTEIN
 
     sequences_fp = str(sequences)
 
-    return _mafft(sequences_fp, None, n_threads, parttree, False, False, large,
+    return _mafft(
+        sequences_fp, None, n_threads, parttree, False, False, large,
+        strategy, maxiterate, retree
+    ,
                   sequence_type)
 
 
@@ -195,7 +210,10 @@ def mafft_add(alignment: Union[AlignedDNAFASTAFormat,
               parttree: bool = False,
               addfragments: bool = False,
               keeplength: bool = False,
-              large: bool = False) -> FASTAFormat:
+              large: bool = False,
+              strategy: str | None = None,
+              maxiterate: int | None = None,
+              retree: int | None = None) -> FASTAFormat:
     _validate_sequence_pair(alignment, sequences)
 
     sequence_type = SequenceType.NUCLEOTIDE
@@ -207,4 +225,5 @@ def mafft_add(alignment: Union[AlignedDNAFASTAFormat,
 
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large, sequence_type)
+        keeplength, large, strategy, maxiterate, retree
+    , sequence_type)
