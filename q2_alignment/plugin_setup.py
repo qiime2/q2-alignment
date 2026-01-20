@@ -6,9 +6,28 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+from importlib import import_module
+
+from q2_types.feature_data import (
+    AlignedProteinSequence,
+    AlignedSequence,
+    FeatureData,
+    ProteinSequence,
+    Sequence,
+)
 from qiime2.plugin import (
-    Plugin, Float, Bool, Range, Citations, Threads, Int, Str, Choices)
-from q2_types.feature_data import FeatureData, Sequence, AlignedSequence
+    Bool,
+    Choices,
+    Citations,
+    Float,
+    Int,
+    Plugin,
+    Range,
+    Str,
+    Threads,
+    TypeMap,
+    TypeMatch,
+)
 
 import q2_alignment
 
@@ -46,6 +65,29 @@ mafft_param_descriptions = {
               'computation.',
 }
 
+T_sequence_in, T_alignment_out = TypeMap({
+    FeatureData[Sequence]:
+        FeatureData[AlignedSequence],
+    FeatureData[ProteinSequence]:
+        FeatureData[AlignedProteinSequence]
+})
+
+(
+    T_expanded_sequence_in,
+    T_expanded_alignment_in,
+    T_expanded_alignment_out,
+) = TypeMap({
+    (FeatureData[Sequence], FeatureData[AlignedSequence]):
+        FeatureData[AlignedSequence],
+    (FeatureData[ProteinSequence], FeatureData[AlignedProteinSequence]):
+        FeatureData[AlignedProteinSequence],
+})
+
+T_match_alignment = TypeMatch([
+    FeatureData[AlignedSequence],
+    FeatureData[AlignedProteinSequence],
+])
+
 citations = Citations.load('citations.bib', package='q2_alignment')
 plugin = Plugin(
     name='alignment',
@@ -59,11 +101,11 @@ plugin = Plugin(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft,
-    inputs={'sequences': FeatureData[Sequence]},
+    inputs={'sequences': T_sequence_in},
     parameters={
         **mafft_params,
     },
-    outputs=[('alignment', FeatureData[AlignedSequence])],
+    outputs=[('alignment', T_alignment_out)],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
         **mafft_param_descriptions,
@@ -76,14 +118,14 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft_add,
-    inputs={'alignment': FeatureData[AlignedSequence],
-            'sequences': FeatureData[Sequence]},
+    inputs={'alignment': T_expanded_alignment_in,
+            'sequences': T_expanded_sequence_in},
     parameters={
         **mafft_params,
         'addfragments': Bool,
         'keeplength': Bool,
     },
-    outputs=[('expanded_alignment', FeatureData[AlignedSequence])],
+    outputs=[('expanded_alignment', T_expanded_alignment_out)],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
                         'sequences': 'The sequences to be added.'},
@@ -108,10 +150,10 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mask,
-    inputs={'alignment': FeatureData[AlignedSequence]},
+    inputs={'alignment': T_match_alignment},
     parameters={'max_gap_frequency': Float % Range(0, 1, inclusive_end=True),
                 'min_conservation': Float % Range(0, 1, inclusive_end=True)},
-    outputs=[('masked_alignment', FeatureData[AlignedSequence])],
+    outputs=[('masked_alignment', T_match_alignment)],
     input_descriptions={'alignment': 'The alignment to be masked.'},
     parameter_descriptions={
         'max_gap_frequency': ('The maximum relative frequency of gap '
@@ -137,3 +179,5 @@ plugin.methods.register_function(
                  "chosen to reproduce the mask presented in Lane (1991)."),
     citations=[citations['lane1991']]
 )
+
+import_module("q2_alignment.types._transformer")

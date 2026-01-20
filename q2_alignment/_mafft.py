@@ -8,10 +8,17 @@
 
 import os
 import subprocess
+from typing import Union
 
 import skbio
 import skbio.io
-from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
+from q2_types.feature_data import (
+    DNAFASTAFormat,
+    AlignedDNAFASTAFormat,
+    ProteinFASTAFormat,
+    AlignedProteinFASTAFormat,
+    FASTAFormat
+)
 from qiime2 import get_cache
 
 
@@ -29,7 +36,7 @@ def run_command(cmd, output_fp, verbose=True, env=None):
 
 
 def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-           keeplength, large, strategy, maxiterate, retree):
+           keeplength, large, strategy, maxiterate, retree, sequence_type):
     # Save original sequence IDs since long ids (~250 chars) can be truncated
     # by mafft. We'll replace the IDs in the aligned sequences file output by
     # mafft with the originals.
@@ -38,9 +45,12 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     aligned_seq_ids = {}
     unaligned_seq_ids = {}
 
+    constructor = skbio.DNA if sequence_type is DNAFASTAFormat \
+        else skbio.Protein
+
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
-                                 constructor=skbio.DNA):
+                                 constructor=constructor):
             id_ = seq.metadata['id']
             if id_ in aligned_seq_ids:
                 raise ValueError(
@@ -50,7 +60,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
                 aligned_seq_ids[id_] = True
 
     for seq in skbio.io.read(sequences_fp, format='fasta',
-                             constructor=skbio.DNA):
+                             constructor=constructor):
         id_ = seq.metadata['id']
         if id_ in unaligned_seq_ids:
             raise ValueError(
@@ -63,7 +73,8 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
         else:
             unaligned_seq_ids[id_] = True
 
-    result = AlignedDNAFASTAFormat()
+    result = FASTAFormat()
+    result.aligned = True
     result_fp = str(result)
     ids = {**aligned_seq_ids, **unaligned_seq_ids}
 
@@ -128,7 +139,7 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     # Read output alignment into memory, reassign original sequence IDs, and
     # write alignment back to disk.
     msa = skbio.TabularMSA.read(result_fp, format='fasta',
-                                constructor=skbio.DNA)
+                                constructor=constructor)
     # Using `assert` because mafft would have had to add or drop sequences
     # while aligning, which would be a bug on mafft's end. This is just a
     # sanity check and is not expected to trigger in practice.
@@ -147,33 +158,40 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     return result
 
 
-def mafft(sequences: DNAFASTAFormat,
-          n_threads: int = 1,
-          parttree: bool = False,
-          large: bool = False,
-          strategy: str | None = None,
-          maxiterate: int | None = None,
-          retree: int | None = None,) -> AlignedDNAFASTAFormat:
+def mafft(
+        sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
+        n_threads: int = 1,
+        parttree: bool = False,
+        large: bool = False,
+        strategy: str | None = None,
+        maxiterate: int | None = None,
+        retree: int | None = None,
+        ) -> FASTAFormat:
     sequences_fp = str(sequences)
+    sequences_type = type(sequences)
+
     return _mafft(
         sequences_fp, None, n_threads, parttree, False, False, large,
-        strategy, maxiterate, retree
-    )
+        strategy, maxiterate, retree, sequences_type)
 
 
-def mafft_add(alignment: AlignedDNAFASTAFormat,
-              sequences: DNAFASTAFormat,
-              n_threads: int = 1,
-              parttree: bool = False,
-              addfragments: bool = False,
-              keeplength: bool = False,
-              large: bool = False,
-              strategy: str | None = None,
-              maxiterate: int | None = None,
-              retree: int | None = None) -> AlignedDNAFASTAFormat:
+def mafft_add(
+        alignment: Union[AlignedDNAFASTAFormat,
+                         AlignedProteinFASTAFormat],
+        sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
+        n_threads: int = 1,
+        parttree: bool = False,
+        addfragments: bool = False,
+        keeplength: bool = False,
+        large: bool = False,
+        strategy: str | None = None,
+        maxiterate: int | None = None,
+        retree: int | None = None
+        ) -> FASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
+    sequences_type = type(sequences)
+
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large, strategy, maxiterate, retree
-    )
+        keeplength, large, strategy, maxiterate, retree, sequences_type)

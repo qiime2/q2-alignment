@@ -28,6 +28,16 @@ class MostConservedTests(unittest.TestCase):
         expected = [1.0, 1.0, 0.5, 0.25]
         self.assertEqual(actual, expected)
 
+    def test_basic_protein(self):
+        frequencies = [
+            {'A': 0.6, 'G': 0.4},
+            {'L': 0.9, 'I': 0.1},
+            {'F': 0.33, '-': 0.67}
+        ]
+        actual = _most_conserved(frequencies, skbio.Protein)
+        expected = [0.6, 0.9, 1.0]
+        self.assertEqual(actual, expected)
+
     def test_N(self):
         frequencies = [{'A': 1/3, '-': 2/3}, {'G': 1.0}, {'A': 2/3, 'N': 1/3}]
         actual = _most_conserved(frequencies, skbio.DNA)
@@ -67,6 +77,23 @@ class MaskTests(unittest.TestCase):
             [skbio.DNA('GA', metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('GA', metadata={'id': 'seq2', 'description': ''}),
              skbio.DNA('GC', metadata={'id': 'seq3', 'description': ''})]
+        )
+
+        self.assertEqual(actual, expected)
+
+    def test_basic_protein(self):
+        alignment = skbio.TabularMSA(
+            [skbio.Protein('MTT', metadata={'id': 'seq1', 'description': ''}),
+             skbio.Protein('-MT', metadata={'id': 'seq2', 'description': ''}),
+             skbio.Protein('-MK', metadata={'id': 'seq3', 'description': ''})]
+        )
+
+        actual = mask(alignment, max_gap_frequency=0.05, min_conservation=0.30)
+
+        expected = skbio.TabularMSA(
+            [skbio.Protein('TT', metadata={'id': 'seq1', 'description': ''}),
+             skbio.Protein('MT', metadata={'id': 'seq2', 'description': ''}),
+             skbio.Protein('MK', metadata={'id': 'seq3', 'description': ''})]
         )
 
         self.assertEqual(actual, expected)

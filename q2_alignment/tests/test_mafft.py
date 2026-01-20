@@ -12,7 +12,12 @@ import subprocess
 
 import skbio
 from qiime2.plugin.testing import TestPluginBase
-from q2_types.feature_data import DNAFASTAFormat, AlignedDNAFASTAFormat
+from q2_types.feature_data import (
+    DNAFASTAFormat,
+    AlignedDNAFASTAFormat,
+    ProteinFASTAFormat,
+    AlignedProteinFASTAFormat,
+)
 from qiime2.util import redirected_stdio
 
 from q2_alignment import mafft, mafft_add
@@ -417,6 +422,56 @@ class MafftAddTests(TestPluginBase):
         self.assertIn('b'*250, obs)
         self.assertIn('seq1', obs)
         self.assertIn('seq2', obs)
+
+    @patch("q2_alignment._mafft._mafft")
+    def test_mafft_add_sets_protein_sequence_type(self, mock_mafft):
+        alignment = AlignedProteinFASTAFormat()
+        seqs = ProteinFASTAFormat()
+        mafft_add(alignment, seqs)
+        mock_mafft.assert_called_once()
+        args, _ = mock_mafft.call_args
+        assert args[-1] is ProteinFASTAFormat
+
+    @patch("q2_alignment._mafft._mafft")
+    def test_mafft_add_sets_nucleotide_sequence_type(self, mock_mafft):
+        alignment = AlignedDNAFASTAFormat()
+        seqs = DNAFASTAFormat()
+        mafft_add(alignment, seqs)
+        mock_mafft.assert_called_once()
+        args, _ = mock_mafft.call_args
+        assert args[-1] is DNAFASTAFormat
+
+    def test_mafft_protein(self):
+        input_fp = self.get_data_path('protein-sequences-1.fasta')
+        input_sequences = ProteinFASTAFormat(input_fp, mode='r')
+        aligned_fp = self.get_data_path('aligned-protein-sequences-1.fasta')
+        exp = AlignedProteinFASTAFormat(aligned_fp, mode='r')
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft(input_sequences)
+        exp = skbio.io.read(str(exp), into=skbio.TabularMSA,
+                            constructor=skbio.Protein)
+        obs = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.Protein)
+
+        self.assertEqual(obs, exp)
+
+    def test_mafft_add_protein(self):
+        sequences_fp = self.get_data_path('protein-sequences-1.fasta')
+        input_sequences = ProteinFASTAFormat(sequences_fp, mode='r')
+        aligned_fp = self.get_data_path('aligned-protein-sequences-2.fasta')
+        input_alignment = AlignedProteinFASTAFormat(aligned_fp, mode='r')
+        exp_fp = self.get_data_path('aligned-protein-sequences-3.fasta')
+        exp_alignment = AlignedProteinFASTAFormat(exp_fp, mode='r')
+
+        with redirected_stdio(stderr=os.devnull):
+            result = mafft_add(input_alignment, input_sequences)
+        exp = skbio.io.read(str(result), into=skbio.TabularMSA,
+                            constructor=skbio.Protein)
+        obs = skbio.io.read(str(exp_alignment), into=skbio.TabularMSA,
+                            constructor=skbio.Protein)
+
+        self.assertEqual(obs, exp)
 
 
 class RunCommandTests(TestPluginBase):
