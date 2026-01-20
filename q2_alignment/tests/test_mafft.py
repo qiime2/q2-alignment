@@ -21,11 +21,7 @@ from q2_types.feature_data import (
 from qiime2.util import redirected_stdio
 
 from q2_alignment import mafft, mafft_add
-from q2_alignment._mafft import (
-    run_command,
-    SequenceType,
-    _validate_sequence_pair,
-)
+from q2_alignment._mafft import run_command
 
 
 class MafftTests(TestPluginBase):
@@ -427,37 +423,6 @@ class MafftAddTests(TestPluginBase):
         self.assertIn('seq1', obs)
         self.assertIn('seq2', obs)
 
-    def test_is_nucleotide_returns_true_for_nucleotide(self):
-        assert SequenceType.NUCLEOTIDE.is_nucleotide() is True
-        assert SequenceType.NUCLEOTIDE.is_protein() is False
-
-    def test_is_protein_returns_true_for_protein(self):
-        assert SequenceType.PROTEIN.is_protein() is True
-        assert SequenceType.PROTEIN.is_nucleotide() is False
-
-    def test_validate_sequence_pair_raises(self):
-        fake_alignment = AlignedDNAFASTAFormat()
-        fake_sequences = ProteinFASTAFormat()
-
-        with self.assertRaisesRegex(TypeError, "Mismatched sequence type"):
-            _validate_sequence_pair(fake_alignment, fake_sequences)
-
-    @patch("q2_alignment._mafft._mafft")
-    def test_mafft_sets_protein_sequence_type(self, mock_mafft):
-        seqs = ProteinFASTAFormat()
-        mafft(seqs)
-        mock_mafft.assert_called_once()
-        args, _ = mock_mafft.call_args
-        assert args[-1] == SequenceType.PROTEIN
-
-    @patch("q2_alignment._mafft._mafft")
-    def test_mafft_sets_nucleotide_sequence_type(self, mock_mafft):
-        seqs = DNAFASTAFormat()
-        mafft(seqs)
-        mock_mafft.assert_called_once()
-        args, _ = mock_mafft.call_args
-        assert args[-1] == SequenceType.NUCLEOTIDE
-
     @patch("q2_alignment._mafft._mafft")
     def test_mafft_add_sets_protein_sequence_type(self, mock_mafft):
         alignment = AlignedProteinFASTAFormat()
@@ -465,7 +430,7 @@ class MafftAddTests(TestPluginBase):
         mafft_add(alignment, seqs)
         mock_mafft.assert_called_once()
         args, _ = mock_mafft.call_args
-        assert args[-1] == SequenceType.PROTEIN
+        assert args[-1] is ProteinFASTAFormat
 
     @patch("q2_alignment._mafft._mafft")
     def test_mafft_add_sets_nucleotide_sequence_type(self, mock_mafft):
@@ -474,7 +439,7 @@ class MafftAddTests(TestPluginBase):
         mafft_add(alignment, seqs)
         mock_mafft.assert_called_once()
         args, _ = mock_mafft.call_args
-        assert args[-1] == SequenceType.NUCLEOTIDE
+        assert args[-1] is DNAFASTAFormat
 
     def test_mafft_protein(self):
         input_fp = self.get_data_path('protein-sequences-1.fasta')

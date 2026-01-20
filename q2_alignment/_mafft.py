@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from enum import Enum
 import os
 import subprocess
 from typing import Union
@@ -21,31 +20,6 @@ from q2_types.feature_data import (
     FASTAFormat
 )
 from qiime2 import get_cache
-
-
-class SequenceType(str, Enum):
-    NUCLEOTIDE = "nucleotide"
-    PROTEIN = "protein"
-
-    def is_nucleotide(self) -> bool:
-        return self is SequenceType.NUCLEOTIDE
-
-    def is_protein(self) -> bool:
-        return self is SequenceType.PROTEIN
-
-
-def _validate_sequence_pair(alignment, sequences):
-    if (
-        isinstance(alignment, AlignedDNAFASTAFormat)
-        and not isinstance(sequences, DNAFASTAFormat)
-    ) or (
-        isinstance(alignment, AlignedProteinFASTAFormat)
-        and not isinstance(sequences, ProteinFASTAFormat)
-    ):
-        raise TypeError(
-            "Mismatched sequence types: 'alignment' and 'sequences' must both "
-            "be either DNA or protein."
-        )
 
 
 def run_command(cmd, output_fp, verbose=True, env=None):
@@ -71,7 +45,8 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     aligned_seq_ids = {}
     unaligned_seq_ids = {}
 
-    constructor = skbio.DNA if sequence_type.is_nucleotide() else skbio.Protein
+    constructor = skbio.DNA if sequence_type is DNAFASTAFormat \
+        else skbio.Protein
 
     if alignment_fp is not None:
         for seq in skbio.io.read(alignment_fp, format='fasta',
@@ -183,44 +158,40 @@ def _mafft(sequences_fp, alignment_fp, n_threads, parttree, addfragments,
     return result
 
 
-def mafft(sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
-          n_threads: int = 1,
-          parttree: bool = False,
-          large: bool = False,
-          strategy: str | None = None,
-          maxiterate: int | None = None,
-          retree: int | None = None,) -> FASTAFormat:
-    sequence_type = SequenceType.NUCLEOTIDE
-    if isinstance(sequences, ProteinFASTAFormat):
-        sequence_type = SequenceType.PROTEIN
-
+def mafft(
+        sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
+        n_threads: int = 1,
+        parttree: bool = False,
+        large: bool = False,
+        strategy: str | None = None,
+        maxiterate: int | None = None,
+        retree: int | None = None,
+        ) -> FASTAFormat:
     sequences_fp = str(sequences)
+    sequences_type = type(sequences)
 
     return _mafft(
         sequences_fp, None, n_threads, parttree, False, False, large,
-        strategy, maxiterate, retree, sequence_type)
+        strategy, maxiterate, retree, sequences_type)
 
 
-def mafft_add(alignment: Union[AlignedDNAFASTAFormat,
-                               AlignedProteinFASTAFormat],
-              sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
-              n_threads: int = 1,
-              parttree: bool = False,
-              addfragments: bool = False,
-              keeplength: bool = False,
-              large: bool = False,
-              strategy: str | None = None,
-              maxiterate: int | None = None,
-              retree: int | None = None) -> FASTAFormat:
-    _validate_sequence_pair(alignment, sequences)
-
-    sequence_type = SequenceType.NUCLEOTIDE
-    if isinstance(sequences, ProteinFASTAFormat):
-        sequence_type = SequenceType.PROTEIN
-
+def mafft_add(
+        alignment: Union[AlignedDNAFASTAFormat,
+                         AlignedProteinFASTAFormat],
+        sequences: Union[DNAFASTAFormat, ProteinFASTAFormat],
+        n_threads: int = 1,
+        parttree: bool = False,
+        addfragments: bool = False,
+        keeplength: bool = False,
+        large: bool = False,
+        strategy: str | None = None,
+        maxiterate: int | None = None,
+        retree: int | None = None
+        ) -> FASTAFormat:
     alignment_fp = str(alignment)
     sequences_fp = str(sequences)
+    sequences_type = type(sequences)
 
     return _mafft(
         sequences_fp, alignment_fp, n_threads, parttree, addfragments,
-        keeplength, large, strategy, maxiterate, retree, sequence_type)
+        keeplength, large, strategy, maxiterate, retree, sequences_type)

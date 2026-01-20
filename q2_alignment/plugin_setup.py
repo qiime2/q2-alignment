@@ -65,14 +65,25 @@ mafft_param_descriptions = {
               'computation.',
 }
 
-T_GenericSequenceInput, T_GenericAlignedSequenceOutput = TypeMap({
+T_sequence_in, T_alignment_out = TypeMap({
     FeatureData[Sequence]:
         FeatureData[AlignedSequence],
     FeatureData[ProteinSequence]:
+        FeatureData[AlignedProteinSequence]
+})
+
+(
+    T_expanded_sequence_in,
+    T_expanded_alignment_in,
+    T_expanded_alignment_out,
+) = TypeMap({
+    (FeatureData[Sequence], FeatureData[AlignedSequence]):
+        FeatureData[AlignedSequence],
+    (FeatureData[ProteinSequence], FeatureData[AlignedProteinSequence]):
         FeatureData[AlignedProteinSequence],
 })
 
-T_MatchAlignedSequenceType = TypeMatch([
+T_match_alignment = TypeMatch([
     FeatureData[AlignedSequence],
     FeatureData[AlignedProteinSequence],
 ])
@@ -90,11 +101,11 @@ plugin = Plugin(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft,
-    inputs={'sequences': T_GenericSequenceInput},
+    inputs={'sequences': T_sequence_in},
     parameters={
         **mafft_params,
     },
-    outputs=[('alignment', T_GenericAlignedSequenceOutput)],
+    outputs=[('alignment', T_alignment_out)],
     input_descriptions={'sequences': 'The sequences to be aligned.'},
     parameter_descriptions={
         **mafft_param_descriptions,
@@ -107,17 +118,14 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mafft_add,
-    inputs={'alignment': (
-            FeatureData[AlignedSequence] |
-            FeatureData[AlignedProteinSequence]
-            ),
-            'sequences': T_GenericSequenceInput},
+    inputs={'alignment': T_expanded_alignment_in,
+            'sequences': T_expanded_sequence_in},
     parameters={
         **mafft_params,
         'addfragments': Bool,
         'keeplength': Bool,
     },
-    outputs=[('expanded_alignment', T_GenericAlignedSequenceOutput)],
+    outputs=[('expanded_alignment', T_expanded_alignment_out)],
     input_descriptions={'alignment': 'The alignment to which '
                                      'sequences should be added.',
                         'sequences': 'The sequences to be added.'},
@@ -142,10 +150,10 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_alignment.mask,
-    inputs={'alignment': T_MatchAlignedSequenceType},
+    inputs={'alignment': T_match_alignment},
     parameters={'max_gap_frequency': Float % Range(0, 1, inclusive_end=True),
                 'min_conservation': Float % Range(0, 1, inclusive_end=True)},
-    outputs=[('masked_alignment', T_MatchAlignedSequenceType)],
+    outputs=[('masked_alignment', T_match_alignment)],
     input_descriptions={'alignment': 'The alignment to be masked.'},
     parameter_descriptions={
         'max_gap_frequency': ('The maximum relative frequency of gap '
