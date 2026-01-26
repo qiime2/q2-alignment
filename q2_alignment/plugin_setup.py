@@ -232,6 +232,7 @@ plugin.pipelines.register_function(
         "inefficient for very large alignments and is only recommended for "
         "small alignments. For large alignments providing specific alignment "
         "positions is ideal."),
+    citations=[citations['Robeson2021rescript']]
 )
 
 import_module("q2_alignment.types._transformer")
