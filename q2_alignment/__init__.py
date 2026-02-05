@@ -8,6 +8,7 @@
 
 from ._mafft import mafft, mafft_add
 from ._filter import mask
+from ._trim_alignment import trim_alignment
 
 
 try:
@@ -15,4 +16,4 @@ try:
 except ModuleNotFoundError:
     __version__ = '0.0.0+notfound'
 
-__all__ = ['mafft', 'mask', 'mafft_add']
+__all__ = ['mafft', 'mask', 'mafft_add', 'trim_alignment']

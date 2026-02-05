@@ -180,4 +180,59 @@ plugin.methods.register_function(
     citations=[citations['lane1991']]
 )
 
+plugin.pipelines.register_function(
+    function=q2_alignment.trim_alignment,
+    inputs={'aligned_sequences': FeatureData[AlignedSequence], },
+    parameters={
+        'primer_fwd': Str,
+        'primer_rev': Str,
+        'position_start': Int % Range(1, None),
+        'position_end': Int % Range(1, None),
+        'keep_primer_location': Bool,
+        'n_threads': Int % Range(1, None),
+    },
+    outputs=[('trimmed_sequences', FeatureData[AlignedSequence]), ],
+    input_descriptions={'aligned_sequences': 'Aligned DNA sequences.', },
+    parameter_descriptions={
+        'primer_fwd': 'Forward primer used to find the start position '
+                      'for alignment trimming. Provide as 5\'-3\'.',
+        'primer_rev': 'Reverse primer used to find the end position '
+                      'for alignment trimming. Provide as 5\'-3\'.',
+        'position_start': 'Position within the alignment where the trimming '
+                          'will begin. If not provided, alignment will not '
+                          'be trimmed at the beginning. If forward primer is'
+                          'specified this parameter will be ignored.',
+        'position_end': 'Position within the alignment where the trimming '
+                        'will end. If not provided, alignment will not be '
+                        'trimmed at the end. If reverse primer is specified '
+                        'this parameter will be ignored.',
+        'keep_primer_location': 'Retain the alignment positions of the '
+                                'primer binding location. Note: the '
+                                'primers themselves will be removed, but '
+                                'the alignment positions where the primers '
+                                'align will be retained in the alignment.',
+        'n_threads': 'Number of threads to use for primer-based trimming, '
+                     'otherwise ignored. (Use `auto` to automatically use '
+                     'all available cores)'
+    },
+    output_descriptions={
+        'trimmed_sequences': 'Trimmed sequence alignment.', },
+    name='Trim alignment based on provided primers or specific positions.',
+    description=(
+        "Trim an existing alignment based on provided primers or specific, p"
+        "re-defined positions. Primers take precedence over the positions,"
+        "i.e. if both are provided, positions will be ignored."
+        "When using primers in combination with a DNA alignment, a new "
+        "alignment will be generated to locate primer positions. "
+        "Subsequently, start (5'-most) and end (3'-most) position from fwd "
+        "and rev primer located within the new alignment is identified and "
+        "used for slicing the original alignment. The retention of alignment "
+        "positions that span the primer locations can be toggled. "
+        "WARNING: finding alignment positions via primer search can be "
+        "inefficient for very large alignments and is only recommended for "
+        "small alignments. For large alignments providing specific alignment "
+        "positions is ideal."),
+    citations=[citations['Robeson2021rescript']]
+)
+
 import_module("q2_alignment.types._transformer")
