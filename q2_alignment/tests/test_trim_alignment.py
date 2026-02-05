@@ -14,7 +14,7 @@ from q2_types.feature_data import (
     AlignedDNAFASTAFormat,
     DNAIterator,)
 
-from .._mafft import mafft_add
+from qiime2.plugins.alignment.methods import mafft_add
 from .._trim_alignment import (
     _prepare_positions, _process_primers, _locate_primer_positions,
     _trim_all_sequences, _trim_alignment)
