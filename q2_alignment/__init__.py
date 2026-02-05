@@ -8,7 +8,7 @@
 
 from ._mafft import mafft, mafft_add
 from ._filter import mask
-from .trim_alignment import trim_alignment
+from ._trim_alignment import trim_alignment
 
 
 try:
