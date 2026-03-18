@@ -27,8 +27,8 @@ class MafftTests(TestPluginBase):
         input_sequences = DNAFASTAFormat(input_fp, mode='r')
         exp = skbio.TabularMSA(
             [skbio.DNA('AGGGGGG', metadata={'id': 'seq1', 'description': ''}),
-             skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})]
-        )
+             skbio.DNA('-GGGGGG', metadata={'id': 'seq2', 'description': ''})],
+            index=['seq1', 'seq2'])
 
         return input_sequences, exp
 
@@ -39,6 +39,7 @@ class MafftTests(TestPluginBase):
             result = mafft(input_sequences)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
+
         self.assertEqual(obs, exp)
 
     def test_multithreaded_mafft(self):
@@ -89,6 +90,7 @@ class MafftTests(TestPluginBase):
             result = mafft(input_sequences, large=True)
         obs = skbio.io.read(str(result), into=skbio.TabularMSA,
                             constructor=skbio.DNA)
+
         self.assertEqual(obs, exp)
 
 
@@ -108,7 +110,8 @@ class MafftAddTests(TestPluginBase):
              skbio.DNA('AGGGGGG',
                        metadata={'id': 'seq1', 'description': ''}),
              skbio.DNA('-GGGGGG',
-                       metadata={'id': 'seq2', 'description': ''})]
+                       metadata={'id': 'seq2', 'description': ''})],
+            index=['aln-seq-1', 'aln-seq-2', 'seq1', 'seq2']
         )
 
         return alignment, sequences, exp
@@ -127,7 +130,8 @@ class MafftAddTests(TestPluginBase):
              skbio.DNA('AGGTTGGC',
                        metadata={'id': 'seq-3', 'description': ''}),
              skbio.DNA('AGGATGGC',
-                       metadata={'id': 'seq-4', 'description': ''})]
+                       metadata={'id': 'seq-4', 'description': ''})],
+            index=['aln-seq-1', 'aln-seq-2', 'seq-3', 'seq-4']
         )
 
         return alignment, sequences, exp
@@ -147,7 +151,8 @@ class MafftAddTests(TestPluginBase):
              skbio.DNA('AGG--TTTTGGC',
                        metadata={'id': 'seq-3', 'description': ''}),
              skbio.DNA('AGGTTA--TGGC',
-                       metadata={'id': 'seq-4', 'description': ''})]
+                       metadata={'id': 'seq-4', 'description': ''})],
+            index=['aln-seq-1', 'aln-seq-2', 'seq-3', 'seq-4']
         )
 
         return alignment, sequences, exp
